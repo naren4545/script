@@ -747,7 +747,7 @@ fetch('https://consentbit.narendra-3c5.workers.dev/api/visitor-token', {
       }; 
  
  
-      const encryptedPayload = await encryptWithHardcodedKey(JSON.stringify(fullPayload)); 
+    //   const encryptedPayload = await encryptWithHardcodedKey(JSON.stringify(fullPayload)); 
  
  
     //   const requestBody = { 
