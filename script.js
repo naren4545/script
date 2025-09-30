@@ -1,7 +1,5 @@
-<script>
+(function () { 
  
- (function () { 
- console.log("hi")
   window.dataLayer = window.dataLayer || []; 
   function gtag() { dataLayer.push(arguments); } 
  
@@ -87,15 +85,13 @@
       } 
     } 
      
-    const analyticsScripts = document.querySelectorAll('script[src*="analytics"], 
-script[src*="gtag"], script[src*="googletagmanager"]'); 
+    const analyticsScripts = document.querySelectorAll('script[src*="analytics"], script[src*="gtag"], script[src*="googletagmanager"]'); 
     if (analyticsScripts.length > 0) { 
     } 
   } 
  
   function forceReloadAnalyticsScripts() { 
-    const analyticsScripts = document.querySelectorAll('script[src*="analytics"], 
-script[src*="gtag"], script[src*="googletagmanager"], script[src*="google-analytics"]'); 
+    const analyticsScripts = document.querySelectorAll('script[src*="analytics"], script[src*="gtag"], script[src*="googletagmanager"], script[src*="google-analytics"]'); 
      
     analyticsScripts.forEach(function(script) { 
       if (script.type === 'text/javascript' && script.src) { 
@@ -406,8 +402,7 @@ document.querySelector(`script[src="${script.src}"][type="text/javascript"]`);
       analytics: getConsentCookie('cb-consent-analytics_storage') === 'true', 
       marketing: getConsentCookie('cb-consent-marketing_storage') === 'true', 
       personalization: getConsentCookie('cb-consent-personalization_storage') === 'true', 
-      doNotShare: getConsentCookie('cb-consent-donotshare') === 'true'  // Convert to 
-camelCase for consistency 
+      doNotShare: getConsentCookie('cb-consent-donotshare') === 'true'  // Convert to camelCase for consistency 
     }; 
   } 
   function showBanner(banner) { 
@@ -440,8 +435,7 @@ camelCase for consistency
     // dataBanners.forEach(banner => hideBanner(banner)); 
      
     // Hide any consent-related divs 
-    // const consentDivs = document.querySelectorAll('.consentbit-ccpa-banner-div, 
-.consentbit-ccpa_preference, .consentbit-gdpr-banner-div, .consentbit-preference_div'); 
+    // const consentDivs = document.querySelectorAll('.consentbit-ccpa-banner-div, .consentbit-ccpa_preference, .consentbit-gdpr-banner-div, .consentbit-preference_div'); 
     // consentDivs.forEach(div => hideBanner(div)); 
   } 
  
@@ -611,8 +605,7 @@ fetch('https://cb-server.web-8fb.workers.dev/api/visitor-token', {
     try { 
       const siteName = window.location.hostname.replace(/^www\./, '').split('.')[0]; 
       const apiUrl = 
-`https://cb-server.web-8fb.workers.dev/api/app-data?siteName=${encodeURIComponent(sit
-eName)}`; 
+`https://cb-server.web-8fb.workers.dev/api/app-data?siteName=${encodeURIComponent(siteName)}`; 
       const response = await fetch(apiUrl, { 
         method: "GET", 
         headers: { 
@@ -674,9 +667,7 @@ eName)}`;
  
       const siteName = window.location.hostname.replace(/^www\./, '').split('.')[0]; 
  
-      const apiUrl = 
-`https://cb-server.web-8fb.workers.dev/api/v2/cmp/detect-location?siteName=${encodeURIC
-omponent(siteName)}`; 
+      const apiUrl = `https://cb-server.web-8fb.workers.dev/api/v2/cmp/detect-location?siteName=${encodeURIComponent(siteName)}`; 
  
       const response = await fetch(apiUrl, { 
         method: 'GET', 
@@ -854,8 +845,7 @@ checkboxName.toLowerCase().includes('functional')) {
       } 
       const siteDomain = window.location.hostname; 
       const apiUrl = 
-`https://cb-server.web-8fb.workers.dev/api/site/subscription-status?siteDomain=${encodeURI
-Component(siteDomain)}`; 
+`https://cb-server.web-8fb.workers.dev/api/site/subscription-status?siteDomain=${encodeURIComponent(siteDomain)}`; 
       const response = await fetch(apiUrl, { 
         method: "GET", 
         headers: { 
@@ -1605,8 +1595,7 @@ document.querySelector('[data-consent-id="personalization-checkbox"]');
         localStorage.setItem("consent-given", "true"); 
  
         try { 
-          await saveConsentStateToServer(preferences, cookieDays, false); // Exclude 
-userAgent like decline 
+          await saveConsentStateToServer(preferences, cookieDays, false); // Exclude userAgent like decline 
         } catch (error) { 
           // Silent error handling 
         } 
@@ -1673,8 +1662,7 @@ userAgent like decline
       }); 
     } 
  
-    // Universal "Do Not Share" link with 
-consentbit-data-donotshare="consentbit-link-donotshare" attribute 
+    // Universal "Do Not Share" link with consentbit-data-donotshare="consentbit-link-donotshare" attribute 
     function setupDoNotShareLinks() { 
       const doNotShareLinks = 
 document.querySelectorAll('[consentbit-data-donotshare="consentbit-link-donotshare"]'); 
@@ -1937,8 +1925,7 @@ document.querySelector(`script[src="${script.src}"][type="text/javascript"]`);
  
   // --- CCPA-specific script handling functions --- 
   function unblockScriptsWithDataCategory() { 
-    // CCPA: Unblock ALL scripts with data-category attribute (including Google scripts) in 
-head section only 
+    // CCPA: Unblock ALL scripts with data-category attribute (including Google scripts) in head section only 
     var scripts = document.head.querySelectorAll('script[type="text/plain"][data-category]'); 
     scripts.forEach(function (script) { 
       // Re-execute the script if it has a src attribute 
@@ -1995,8 +1982,7 @@ document.querySelector(`script[src="${script.src}"][type="text/javascript"]`);
   } 
  
   function blockScriptsWithDataCategory() { 
-    // CCPA: Block ALL scripts with data-category attribute (including Google scripts) in head 
-section only 
+    // CCPA: Block ALL scripts with data-category attribute (including Google scripts) in head section only 
     var scripts = document.head.querySelectorAll('script[data-category]'); 
     scripts.forEach(function (script) { 
       if (script.type !== 'text/plain') { 
@@ -2036,9 +2022,7 @@ section only
       const siteName = window.location.hostname.replace(/^www\./, '').split('.')[0]; 
  
       // Build API URL with siteName parameter 
-      const apiUrl = 
-`https://cb-server.web-8fb.workers.dev/api/v2/cmp/head-scripts?siteName=${encodeURICo
-mponent(siteName)}`; 
+      const apiUrl = `https://cb-server.web-8fb.workers.dev/api/v2/cmp/head-scripts?siteName=${encodeURIComponent(siteName)}`; 
  
       const response = await fetch(apiUrl, { 
         method: 'POST', 
@@ -2083,9 +2067,7 @@ mponent(siteName)}`;
  
   function blockTargetedAdvertisingScripts() { 
     const targetedAdvertisingPatterns = 
-/facebook|meta|fbevents|linkedin|twitter|pinterest|tiktok|snap|reddit|quora|outbrain|taboola|sh
-arethrough|doubleclick|adwords|adsense|adservice|pixel|quantserve|scorecardresearch|moa
-t|integral-marketing|comscore|nielsen|quantcast|adobe/i; 
+/facebook|meta|fbevents|linkedin|twitter|pinterest|tiktok|snap|reddit|quora|outbrain|taboola|sharethrough|doubleclick|adwords|adsense|adservice|pixel|quantserve|scorecardresearch|moat|integral-marketing|comscore|nielsen|quantcast|adobe/i; 
  
     const scripts = document.head.querySelectorAll('script[src]'); 
     scripts.forEach(script => { 
@@ -2100,10 +2082,7 @@ t|integral-marketing|comscore|nielsen|quantcast|adobe/i;
  
   function blockSaleScripts() { 
     const salePatterns = 
-/facebook|meta|fbevents|linkedin|twitter|pinterest|tiktok|snap|reddit|quora|outbrain|taboola|sh
-arethrough|doubleclick|adwords|adsense|adservice|pixel|quantserve|scorecardresearch|moa
-t|integral-marketing|comscore|nielsen|quantcast|adobe|marketo|hubspot|salesforce|pardot|el
-oqua|act-on|mailchimp|constantcontact|sendgrid|klaviyo|braze|iterable/i; 
+/facebook|meta|fbevents|linkedin|twitter|pinterest|tiktok|snap|reddit|quora|outbrain|taboola|sharethrough|doubleclick|adwords|adsense|adservice|pixel|quantserve|scorecardresearch|moat|integral-marketing|comscore|nielsen|quantcast|adobe|marketo|hubspot|salesforce|pardot|eloqua|act-on|mailchimp|constantcontact|sendgrid|klaviyo|braze|iterable/i; 
  
     const scripts = document.head.querySelectorAll('script[src]'); 
     scripts.forEach(script => { 
@@ -2117,10 +2096,7 @@ oqua|act-on|mailchimp|constantcontact|sendgrid|klaviyo|braze|iterable/i;
   } 
  
   function blockProfilingScripts() { 
-    const profilingPatterns = 
-/optimizely|hubspot|marketo|pardot|salesforce|intercom|drift|zendesk|freshchat|tawk|livechat|
-clarity|hotjar|mouseflow|fullstory|logrocket|mixpanel|segment|amplitude|heap|kissmetrics|mat
-omo|piwik|plausible|woopra|crazyegg|clicktale|chartbeat|parse\.ly/i; 
+    const profilingPatterns = /optimizely|hubspot|marketo|pardot|salesforce|intercom|drift|zendesk|freshchat|tawk|livechat|clarity|hotjar|mouseflow|fullstory|logrocket|mixpanel|segment|amplitude|heap|kissmetrics|matomo|piwik|plausible|woopra|crazyegg|clicktale|chartbeat|parse\.ly/i; 
  
     const scripts = document.head.querySelectorAll('script[src]'); 
     scripts.forEach(script => { 
@@ -2135,9 +2111,7 @@ omo|piwik|plausible|woopra|crazyegg|clicktale|chartbeat|parse\.ly/i;
  
   function blockCrossContextBehavioralAdvertising() { 
     const crossContextPatterns = 
-/facebook|meta|fbevents|linkedin|twitter|pinterest|tiktok|snap|reddit|quora|outbrain|taboola|sh
-arethrough|doubleclick|adwords|adsense|adservice|pixel|quantserve|scorecardresearch|moa
-t|integral-marketing|comscore|nielsen|quantcast|adobe/i; 
+/facebook|meta|fbevents|linkedin|twitter|pinterest|tiktok|snap|reddit|quora|outbrain|taboola|sharethrough|doubleclick|adwords|adsense|adservice|pixel|quantserve|scorecardresearch|moat|integral-marketing|comscore|nielsen|quantcast|adobe/i; 
  
     const scripts = document.head.querySelectorAll('script[src]'); 
     scripts.forEach(script => { 
@@ -2152,9 +2126,7 @@ t|integral-marketing|comscore|nielsen|quantcast|adobe/i;
  
   function blockAutomatedDecisionScripts() { 
     const automatedDecisionPatterns = 
-/optimizely|hubspot|marketo|pardot|salesforce|intercom|drift|zendesk|freshchat|tawk|livechat|
-clarity|hotjar|mouseflow|fullstory|logrocket|mixpanel|segment|amplitude|heap|kissmetrics|mat
-omo|piwik|plausible|woopra|crazyegg|clicktale|chartbeat|parse\.ly/i; 
+/optimizely|hubspot|marketo|pardot|salesforce|intercom|drift|zendesk|freshchat|tawk|livechat|clarity|hotjar|mouseflow|fullstory|logrocket|mixpanel|segment|amplitude|heap|kissmetrics|matomo|piwik|plausible|woopra|crazyegg|clicktale|chartbeat|parse\.ly/i; 
      
     const scripts = document.head.querySelectorAll('script[src]'); 
     scripts.forEach(script => { 
@@ -2346,8 +2318,7 @@ omo|piwik|plausible|woopra|crazyegg|clicktale|chartbeat|parse\.ly/i;
        
 //       // Track button clicks 
 //       if (target.tagName === 'BUTTON' || target.classList.contains('w-button')) { 
-//         const buttonText = target.textContent.trim() || target.getAttribute('aria-label') || 'Unknown 
-// Button'; 
+//         const buttonText = target.textContent.trim() || target.getAttribute('aria-label') || 'Unknown Button'; 
 //         const buttonId = target.id || 'unknown'; 
          
 //         trackWebflowEvent('button_click', { 
@@ -2376,128 +2347,128 @@ omo|piwik|plausible|woopra|crazyegg|clicktale|chartbeat|parse\.ly/i;
 //     }); 
 //   } 
  
-  // Helper function to check if analytics consent is given 
-  function getConsentBitAnalyticsConsent() { 
-    const consentGiven = localStorage.getItem("consent-given"); 
-    const analyticsConsent = localStorage.getItem("cb-consent-analytics_storage"); 
-    return consentGiven === "true" && analyticsConsent === "true"; 
-  } 
+//   // Helper function to check if analytics consent is given 
+//   function getConsentBitAnalyticsConsent() { 
+//     const consentGiven = localStorage.getItem("consent-given"); 
+//     const analyticsConsent = localStorage.getItem("cb-consent-analytics_storage"); 
+//     return consentGiven === "true" && analyticsConsent === "true"; 
+//   } 
  
-  // Helper function to get active consent categories 
-  function getActiveConsentCategories() { 
-    const categories = []; 
-    if (localStorage.getItem("cb-consent-analytics_storage") === "true") 
-categories.push('analytics'); 
-    if (localStorage.getItem("cb-consent-marketing_storage") === "true") 
-categories.push('marketing'); 
-    if (localStorage.getItem("cb-consent-personalization_storage") === "true") 
-categories.push('personalization'); 
-    return categories.join(','); 
-  } 
+//   // Helper function to get active consent categories 
+//   function getActiveConsentCategories() { 
+//     const categories = []; 
+//     if (localStorage.getItem("cb-consent-analytics_storage") === "true") 
+// categories.push('analytics'); 
+//     if (localStorage.getItem("cb-consent-marketing_storage") === "true") 
+// categories.push('marketing'); 
+//     if (localStorage.getItem("cb-consent-personalization_storage") === "true") 
+// categories.push('personalization'); 
+//     return categories.join(','); 
+//   } 
  
-  // Monitor consent changes and update Webflow Analytics 
-  function monitorConsentChanges() { 
-    let lastConsentState = getConsentBitAnalyticsConsent(); 
+//   // Monitor consent changes and update Webflow Analytics 
+//   function monitorConsentChanges() { 
+//     let lastConsentState = getConsentBitAnalyticsConsent(); 
      
-    setInterval(function() { 
-      const currentConsentState = getConsentBitAnalyticsConsent(); 
+//     setInterval(function() { 
+//       const currentConsentState = getConsentBitAnalyticsConsent(); 
        
-      if (currentConsentState !== lastConsentState) { 
+//       if (currentConsentState !== lastConsentState) { 
          
-        if (currentConsentState) { 
-          // Consent granted - initialize Webflow Analytics 
-          initializeWebflowAnalytics(); 
-        } else { 
-          // Consent revoked - track revocation event and disable 
-          if (typeof window.WebflowAnalytics !== 'undefined') { 
-            trackWebflowEvent('consentbit_consent_revoked', { 
-              category: 'consent', 
-              label: 'analytics_consent_revoked', 
-              consentbit_integration: true 
-            }); 
-          } 
-          // Remove Webflow Analytics script when consent is revoked 
-          disableWebflowAnalytics(); 
-        } 
+//         if (currentConsentState) { 
+//           // Consent granted - initialize Webflow Analytics 
+//           initializeWebflowAnalytics(); 
+//         } else { 
+//           // Consent revoked - track revocation event and disable 
+//           if (typeof window.WebflowAnalytics !== 'undefined') { 
+//             trackWebflowEvent('consentbit_consent_revoked', { 
+//               category: 'consent', 
+//               label: 'analytics_consent_revoked', 
+//               consentbit_integration: true 
+//             }); 
+//           } 
+//           // Remove Webflow Analytics script when consent is revoked 
+//           disableWebflowAnalytics(); 
+//         } 
          
-        lastConsentState = currentConsentState; 
-      } 
-    }, 2000); 
-  } 
+//         lastConsentState = currentConsentState; 
+//       } 
+//     }, 2000); 
+//   } 
  
   // Remove Webflow Analytics script when consent is revoked 
-  function disableWebflowAnalytics() { 
-    try { 
-      // Remove the script tag 
-      const scriptTag = document.querySelector('script[src*="analyze.js"]'); 
-      if (scriptTag) { 
-        scriptTag.remove(); 
+//   function disableWebflowAnalytics() { 
+//     try { 
+//       // Remove the script tag 
+//       const scriptTag = document.querySelector('script[src*="analyze.js"]'); 
+//       if (scriptTag) { 
+//         scriptTag.remove(); 
          
-      } 
+//       } 
        
-      // Clear the global object 
-      if (window.WebflowAnalytics) { 
-        delete window.WebflowAnalytics; 
+//       // Clear the global object 
+//       if (window.WebflowAnalytics) { 
+//         delete window.WebflowAnalytics; 
         
-      } 
-    } catch (error) { 
-    } 
-  } 
+//       } 
+//     } catch (error) { 
+//     } 
+//   } 
  
-  // Public API for external use 
-  window.ConsentBitWebflowIntegration = { 
-    // Configuration 
-    config: WEBFLOW_ANALYTICS_CONFIG, 
+//   // Public API for external use 
+//   window.ConsentBitWebflowIntegration = { 
+//     // Configuration 
+//     config: WEBFLOW_ANALYTICS_CONFIG, 
      
-    // Core functions 
-    trackEvent: trackWebflowEvent, 
-    trackPageView: trackWebflowPageView, 
-    initialize: initializeWebflowAnalytics, 
+//     // Core functions 
+//     trackEvent: trackWebflowEvent, 
+//     trackPageView: trackWebflowPageView, 
+//     initialize: initializeWebflowAnalytics, 
      
-    // Script management 
-    enableAnalytics: enableWebflowAnalytics, 
-    disableAnalytics: disableWebflowAnalytics, 
+//     // Script management 
+//     enableAnalytics: enableWebflowAnalytics, 
+//     disableAnalytics: disableWebflowAnalytics, 
      
-    // Consent functions 
-    getAnalyticsConsent: getConsentBitAnalyticsConsent, 
-    getActiveConsentCategories: getActiveConsentCategories, 
+//     // Consent functions 
+//     getAnalyticsConsent: getConsentBitAnalyticsConsent, 
+//     getActiveConsentCategories: getActiveConsentCategories, 
      
-    // Utility functions 
-    isWebflowAnalyticsAvailable: function() { 
-      return typeof window.WebflowAnalytics !== 'undefined'; 
-    }, 
+//     // Utility functions 
+//     isWebflowAnalyticsAvailable: function() { 
+//       return typeof window.WebflowAnalytics !== 'undefined'; 
+//     }, 
      
-    // Configuration helpers 
-    enableDebugMode: function() { 
-      WEBFLOW_ANALYTICS_CONFIG.debugMode = true; 
-    }, 
+//     // Configuration helpers 
+//     enableDebugMode: function() { 
+//       WEBFLOW_ANALYTICS_CONFIG.debugMode = true; 
+//     }, 
      
-    disableTracking: function() { 
-      WEBFLOW_ANALYTICS_CONFIG.enabled = false; 
-    }, 
+//     disableTracking: function() { 
+//       WEBFLOW_ANALYTICS_CONFIG.enabled = false; 
+//     }, 
      
-    enableTracking: function() { 
-      WEBFLOW_ANALYTICS_CONFIG.enabled = true; 
-    } 
-  }; 
+//     enableTracking: function() { 
+//       WEBFLOW_ANALYTICS_CONFIG.enabled = true; 
+//     } 
+//   }; 
  
-  // Set up consent event listener for external CMP integration 
-  document.addEventListener('consentUpdated', function(event) { 
-    if (event.detail && event.detail.analytics === true) { 
-      enableWebflowAnalytics(); 
-    } else if (event.detail && event.detail.analytics === false) { 
-      disableWebflowAnalytics(); 
-    } 
-  }); 
+//   // Set up consent event listener for external CMP integration 
+//   document.addEventListener('consentUpdated', function(event) { 
+//     if (event.detail && event.detail.analytics === true) { 
+//       enableWebflowAnalytics(); 
+//     } else if (event.detail && event.detail.analytics === false) { 
+//       disableWebflowAnalytics(); 
+//     } 
+//   }); 
  
-  // Also listen for the legacy consent event format 
-  document.addEventListener('consentUpdated', function(event) { 
-    if (window.userConsent && window.userConsent.analytics === true) { 
-      enableWebflowAnalytics(); 
-    } else if (window.userConsent && window.userConsent.analytics === false) { 
-      disableWebflowAnalytics(); 
-    } 
-  }); 
+//   // Also listen for the legacy consent event format 
+//   document.addEventListener('consentUpdated', function(event) { 
+//     if (window.userConsent && window.userConsent.analytics === true) { 
+//       enableWebflowAnalytics(); 
+//     } else if (window.userConsent && window.userConsent.analytics === false) { 
+//       disableWebflowAnalytics(); 
+//     } 
+//   }); 
  
 })(); 
-</script>
+ 
