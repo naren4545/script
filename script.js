@@ -543,7 +543,7 @@ document.querySelector(`script[src="${script.src}"][type="text/javascript"]`);
   console.log("problem check4")
       const visitorId = await getOrCreateVisitorId(); 
       console.log("problem check5", visitorId)
-      const siteName = document.getElementById('consentbit-site-id').textContent; 
+      const siteName = document.getElementById('consensite-id').textContent; 
 console.log("siteName",siteName)
       const response = await fetch('https://consentbit.narendra-3c5.workers.dev/api/visitor-token', { 
         method: 'POST', 
