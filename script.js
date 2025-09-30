@@ -522,8 +522,9 @@ document.querySelector(`script[src="${script.src}"][type="text/javascript"]`);
  
   async function getVisitorSessionToken() { 
     try { 
- 
+  console.log("problem check 1")
       if (tokenRequestInProgress) { 
+       console.log("problem check2")
         await new Promise(resolve => setTimeout(resolve, 1000)); 
         const existingToken = localStorage.getItem('visitorSessionToken'); 
         if (existingToken && !isTokenExpired(existingToken)) { 
@@ -533,6 +534,7 @@ document.querySelector(`script[src="${script.src}"][type="text/javascript"]`);
  
       const existingToken = localStorage.getItem('visitorSessionToken'); 
       if (existingToken && !isTokenExpired(existingToken)) { 
+        console.log("problem check 3")
         return existingToken; 
       } 
  
