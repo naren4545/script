@@ -717,6 +717,8 @@ fetch('https://consentbit.narendra-3c5.workers.dev/api/visitor-token', {
       const timestamp = new Date().toISOString(); 
       const sessionToken = localStorage.getItem("visitorSessionToken"); 
  
+ const siteId = document.getElementById('consensite-id').textContent;
+
       if (!sessionToken) { 
         return; 
       } 
@@ -726,6 +728,7 @@ fetch('https://consentbit.narendra-3c5.workers.dev/api/visitor-token', {
  
       const fullPayload = { 
         clientId, 
+       siteId,
         visitorId, 
         preferences, 
         policyVersion, 
@@ -747,13 +750,13 @@ fetch('https://consentbit.narendra-3c5.workers.dev/api/visitor-token', {
  
  
       const requestBody = { 
-        encryptedData: encryptedPayload 
+        encryptedData: fullPayload
       }; 
  
  
  
       const response = await 
-fetch("https://cb-server.web-8fb.workers.dev/api/v2/cmp/consent", { 
+fetch("https://consentbit.narendra-3c5.workers.dev/consent", { 
         method: "POST", 
         headers: { 
           "Content-Type": "application/json", 
