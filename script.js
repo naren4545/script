@@ -855,12 +855,12 @@ checkboxName.toLowerCase().includes('functional')) {
         } 
       }); 
       if (!response.ok) { 
-        return false; 
+        return true; 
       } 
       const data = await response.json(); 
       return data.canPublishToCustomDomain === true; 
     } catch (error) { 
-      return false; 
+      return true; 
     } 
   } 
   function removeConsentElements() {    const selectors = [ 
