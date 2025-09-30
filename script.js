@@ -1092,6 +1092,7 @@ ccpaBanner) {
         } 
       } 
       canPublish = await checkPublishingStatus(); 
+     console.log(canPublish)
       isStaging = isStagingHostname(); 
  
       if (!canPublish && !isStaging) { 
