@@ -845,6 +845,7 @@ checkboxName.toLowerCase().includes('functional')) {
   async function checkPublishingStatus() { 
     try { 
       const sessionToken = localStorage.getItem('visitorSessionToken'); 
+      console.log("problem check6", sessionToken)
       if (!sessionToken) { 
         return false; 
       } 
