@@ -750,11 +750,11 @@ fetch('https://consentbit.narendra-3c5.workers.dev/api/visitor-token', {
       const encryptedPayload = await encryptWithHardcodedKey(JSON.stringify(fullPayload)); 
  
  
-      const requestBody = { 
-        encryptedData: fullPayload
-      }; 
+    //   const requestBody = { 
+    //     encryptedData: fullPayload
+    //   }; 
  
- 
+ const requestBody =fullPayload
  
       const response = await 
 fetch("https://consentbit.narendra-3c5.workers.dev/consent", { 
