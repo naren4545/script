@@ -1,4 +1,6 @@
-(function () { 
+<script>
+ 
+ (function () { 
  console.log("hi")
   window.dataLayer = window.dataLayer || []; 
   function gtag() { dataLayer.push(arguments); } 
@@ -2170,209 +2172,209 @@ omo|piwik|plausible|woopra|crazyegg|clicktale|chartbeat|parse\.ly/i;
   // ======================================== 
  
   // Configuration for Webflow Analytics integration 
-  const WEBFLOW_ANALYTICS_CONFIG = { 
-    enabled: true, 
-    trackPageViews: true, 
-    trackForms: true, 
-    trackClicks: true, 
-    trackEvents: true, 
-    debugMode: false, 
-    scriptUrl: "https://cdn.webflow.com/analyze.js" // Webflow Analytics script URL 
-  }; 
+//   const WEBFLOW_ANALYTICS_CONFIG = { 
+//     enabled: true, 
+//     trackPageViews: true, 
+//     trackForms: true, 
+//     trackClicks: true, 
+//     trackEvents: true, 
+//     debugMode: false, 
+//     scriptUrl: "https://cdn.webflow.com/analyze.js" // Webflow Analytics script URL 
+//   }; 
  
-  // Dynamically load Webflow Analytics script based on consent 
-  function enableWebflowAnalytics() { 
-    if (typeof window.WebflowAnalytics === "undefined") { 
-      try { 
-        // Check if script is already being loaded 
-        if (document.querySelector('script[src*="analyze.js"]')) { 
-          return; 
-        } 
+//   // Dynamically load Webflow Analytics script based on consent 
+//   function enableWebflowAnalytics() { 
+//     if (typeof window.WebflowAnalytics === "undefined") { 
+//       try { 
+//         // Check if script is already being loaded 
+//         if (document.querySelector('script[src*="analyze.js"]')) { 
+//           return; 
+//         } 
  
-        // Create and insert Webflow Analytics script 
-        var script = document.createElement("script"); 
-        script.src = WEBFLOW_ANALYTICS_CONFIG.scriptUrl; 
-        script.async = true; 
-        script.onload = function() { 
-          // Initialize tracking after script loads 
-          setTimeout(initializeWebflowAnalytics, 100); 
-        }; 
-        script.onerror = function() { 
-          // Silent error handling 
-        }; 
+//         // Create and insert Webflow Analytics script 
+//         var script = document.createElement("script"); 
+//         script.src = WEBFLOW_ANALYTICS_CONFIG.scriptUrl; 
+//         script.async = true; 
+//         script.onload = function() { 
+//           // Initialize tracking after script loads 
+//           setTimeout(initializeWebflowAnalytics, 100); 
+//         }; 
+//         script.onerror = function() { 
+//           // Silent error handling 
+//         }; 
          
-        document.head.appendChild(script); 
+//         document.head.appendChild(script); 
          
         
-      } catch (error) { 
-      } 
-    } else { 
+//       } catch (error) { 
+//       } 
+//     } else { 
       
-      // Initialize tracking immediately if already available 
-      initializeWebflowAnalytics(); 
-    } 
-  } 
+//       // Initialize tracking immediately if already available 
+//       initializeWebflowAnalytics(); 
+//     } 
+//   } 
  
-  // Initialize Webflow Analytics when consent is given 
-  function initializeWebflowAnalytics() { 
-    if (!WEBFLOW_ANALYTICS_CONFIG.enabled) { 
-      return; 
-    } 
+//   // Initialize Webflow Analytics when consent is given 
+//   function initializeWebflowAnalytics() { 
+//     if (!WEBFLOW_ANALYTICS_CONFIG.enabled) { 
+//       return; 
+//     } 
  
-    const consentGiven = localStorage.getItem("consent-given"); 
-    const analyticsConsent = localStorage.getItem("cb-consent-analytics_storage"); 
+//     const consentGiven = localStorage.getItem("consent-given"); 
+//     const analyticsConsent = localStorage.getItem("cb-consent-analytics_storage"); 
      
-    // Only proceed if consent is given AND analytics consent is specifically granted 
-    if (consentGiven === "true" && analyticsConsent === "true") { 
-      if (typeof window.WebflowAnalytics !== 'undefined') { 
+//     // Only proceed if consent is given AND analytics consent is specifically granted 
+//     if (consentGiven === "true" && analyticsConsent === "true") { 
+//       if (typeof window.WebflowAnalytics !== 'undefined') { 
          
-        // Track initial page view 
-        trackWebflowPageView(); 
+//         // Track initial page view 
+//         trackWebflowPageView(); 
          
-        // Set up form tracking 
-        if (WEBFLOW_ANALYTICS_CONFIG.trackForms) { 
-          setupWebflowFormTracking(); 
-        } 
+//         // Set up form tracking 
+//         if (WEBFLOW_ANALYTICS_CONFIG.trackForms) { 
+//           setupWebflowFormTracking(); 
+//         } 
          
-        // Set up click tracking 
-        if (WEBFLOW_ANALYTICS_CONFIG.trackClicks) { 
-          setupWebflowClickTracking(); 
-        } 
+//         // Set up click tracking 
+//         if (WEBFLOW_ANALYTICS_CONFIG.trackClicks) { 
+//           setupWebflowClickTracking(); 
+//         } 
          
-        // Track consent granted event 
-        trackWebflowEvent('consentbit_consent_granted', { 
-          category: 'consent', 
-          label: 'analytics_consent_granted', 
-          consent_categories: getActiveConsentCategories(), 
-          consentbit_integration: true 
-        }); 
-      } else { 
-        // Try to load the Webflow Analytics script 
-        enableWebflowAnalytics(); 
-      } 
-    } else { 
-      // If consent is revoked or analytics consent is false, ensure script is removed 
-      if (consentGiven === "true" && analyticsConsent === "false") { 
-        disableWebflowAnalytics(); 
-      } 
-    } 
-  } 
+//         // Track consent granted event 
+//         trackWebflowEvent('consentbit_consent_granted', { 
+//           category: 'consent', 
+//           label: 'analytics_consent_granted', 
+//           consent_categories: getActiveConsentCategories(), 
+//           consentbit_integration: true 
+//         }); 
+//       } else { 
+//         // Try to load the Webflow Analytics script 
+//         enableWebflowAnalytics(); 
+//       } 
+//     } else { 
+//       // If consent is revoked or analytics consent is false, ensure script is removed 
+//       if (consentGiven === "true" && analyticsConsent === "false") { 
+//         disableWebflowAnalytics(); 
+//       } 
+//     } 
+//   } 
  
-  // Track Webflow page view 
-  function trackWebflowPageView() { 
-    if (typeof window.WebflowAnalytics !== 'undefined' && getConsentBitAnalyticsConsent()) { 
-      try { 
-        window.WebflowAnalytics.track('page_view', { 
-          page_title: document.title, 
-          page_url: window.location.href, 
-          page_referrer: document.referrer, 
-          consentbit_integration: true, 
-          consentbit_timestamp: new Date().toISOString() 
-        }); 
-      } catch (error) { 
-      } 
-    } 
-  } 
+//   // Track Webflow page view 
+//   function trackWebflowPageView() { 
+//     if (typeof window.WebflowAnalytics !== 'undefined' && getConsentBitAnalyticsConsent()) { 
+//       try { 
+//         window.WebflowAnalytics.track('page_view', { 
+//           page_title: document.title, 
+//           page_url: window.location.href, 
+//           page_referrer: document.referrer, 
+//           consentbit_integration: true, 
+//           consentbit_timestamp: new Date().toISOString() 
+//         }); 
+//       } catch (error) { 
+//       } 
+//     } 
+//   } 
  
-  // Track custom events in Webflow Analytics 
-  function trackWebflowEvent(eventName, eventData = {}) { 
-    if (typeof window.WebflowAnalytics !== 'undefined' && getConsentBitAnalyticsConsent()) { 
-      try { 
-        const enhancedEventData = { 
-          ...eventData, 
-          consentbit_integration: true, 
-          consentbit_timestamp: new Date().toISOString() 
-        }; 
+//   // Track custom events in Webflow Analytics 
+//   function trackWebflowEvent(eventName, eventData = {}) { 
+//     if (typeof window.WebflowAnalytics !== 'undefined' && getConsentBitAnalyticsConsent()) { 
+//       try { 
+//         const enhancedEventData = { 
+//           ...eventData, 
+//           consentbit_integration: true, 
+//           consentbit_timestamp: new Date().toISOString() 
+//         }; 
          
-        window.WebflowAnalytics.track(eventName, enhancedEventData); 
-      } catch (error) { 
-      } 
-    } 
-  } 
+//         window.WebflowAnalytics.track(eventName, enhancedEventData); 
+//       } catch (error) { 
+//       } 
+//     } 
+//   } 
  
-  // Set up Webflow form tracking 
-  function setupWebflowFormTracking() { 
-    if (!getConsentBitAnalyticsConsent()) return; 
+//   // Set up Webflow form tracking 
+//   function setupWebflowFormTracking() { 
+//     if (!getConsentBitAnalyticsConsent()) return; 
  
-    document.addEventListener('submit', function(event) { 
-      const form = event.target; 
+//     document.addEventListener('submit', function(event) { 
+//       const form = event.target; 
        
-      // Check if it's a Webflow form 
-      if (form.classList.contains('w-form') || form.hasAttribute('data-name')) { 
-        const formName = form.getAttribute('data-name') || 'Unknown Form'; 
+//       // Check if it's a Webflow form 
+//       if (form.classList.contains('w-form') || form.hasAttribute('data-name')) { 
+//         const formName = form.getAttribute('data-name') || 'Unknown Form'; 
          
-        // Track form submission 
-        trackWebflowEvent('form_submit', { 
-          category: 'forms', 
-          label: formName, 
-          form_id: form.id || 'unknown', 
-          form_action: form.action || 'unknown', 
-          consentbit_form_tracking: true 
-        }); 
+//         // Track form submission 
+//         trackWebflowEvent('form_submit', { 
+//           category: 'forms', 
+//           label: formName, 
+//           form_id: form.id || 'unknown', 
+//           form_action: form.action || 'unknown', 
+//           consentbit_form_tracking: true 
+//         }); 
          
-        // Track form success/failure 
-        setTimeout(function() { 
-          const successMessage = form.querySelector('.w-form-done'); 
-          const errorMessage = form.querySelector('.w-form-fail'); 
+//         // Track form success/failure 
+//         setTimeout(function() { 
+//           const successMessage = form.querySelector('.w-form-done'); 
+//           const errorMessage = form.querySelector('.w-form-fail'); 
            
-          if (successMessage && successMessage.style.display !== 'none') { 
-            trackWebflowEvent('form_success', { 
-              category: 'forms', 
-              label: formName, 
-              form_id: form.id || 'unknown', 
-              consentbit_form_tracking: true 
-            }); 
-          } else if (errorMessage && errorMessage.style.display !== 'none') { 
-            trackWebflowEvent('form_error', { 
-              category: 'forms', 
-              label: formName, 
-              form_id: form.id || 'unknown', 
-              consentbit_form_tracking: true 
-            }); 
-          } 
-        }, 1000); 
-      } 
-    }); 
-  } 
+//           if (successMessage && successMessage.style.display !== 'none') { 
+//             trackWebflowEvent('form_success', { 
+//               category: 'forms', 
+//               label: formName, 
+//               form_id: form.id || 'unknown', 
+//               consentbit_form_tracking: true 
+//             }); 
+//           } else if (errorMessage && errorMessage.style.display !== 'none') { 
+//             trackWebflowEvent('form_error', { 
+//               category: 'forms', 
+//               label: formName, 
+//               form_id: form.id || 'unknown', 
+//               consentbit_form_tracking: true 
+//             }); 
+//           } 
+//         }, 1000); 
+//       } 
+//     }); 
+//   } 
  
-  // Set up Webflow click tracking 
-  function setupWebflowClickTracking() { 
-    if (!getConsentBitAnalyticsConsent()) return; 
+//   // Set up Webflow click tracking 
+//   function setupWebflowClickTracking() { 
+//     if (!getConsentBitAnalyticsConsent()) return; 
  
-    document.addEventListener('click', function(event) { 
-      const target = event.target; 
+//     document.addEventListener('click', function(event) { 
+//       const target = event.target; 
        
-      // Track button clicks 
-      if (target.tagName === 'BUTTON' || target.classList.contains('w-button')) { 
-        const buttonText = target.textContent.trim() || target.getAttribute('aria-label') || 'Unknown 
-Button'; 
-        const buttonId = target.id || 'unknown'; 
+//       // Track button clicks 
+//       if (target.tagName === 'BUTTON' || target.classList.contains('w-button')) { 
+//         const buttonText = target.textContent.trim() || target.getAttribute('aria-label') || 'Unknown 
+// Button'; 
+//         const buttonId = target.id || 'unknown'; 
          
-        trackWebflowEvent('button_click', { 
-          category: 'engagement', 
-          label: buttonText, 
-          button_id: buttonId, 
-          button_type: target.getAttribute('data-type') || 'general', 
-          consentbit_click_tracking: true 
-        }); 
-      } 
+//         trackWebflowEvent('button_click', { 
+//           category: 'engagement', 
+//           label: buttonText, 
+//           button_id: buttonId, 
+//           button_type: target.getAttribute('data-type') || 'general', 
+//           consentbit_click_tracking: true 
+//         }); 
+//       } 
        
-      // Track link clicks 
-      if (target.tagName === 'A' || target.closest('a')) { 
-        const link = target.tagName === 'A' ? target : target.closest('a'); 
-        const linkText = link.textContent.trim() || link.getAttribute('aria-label') || 'Unknown Link'; 
-        const linkHref = link.href || 'unknown'; 
+//       // Track link clicks 
+//       if (target.tagName === 'A' || target.closest('a')) { 
+//         const link = target.tagName === 'A' ? target : target.closest('a'); 
+//         const linkText = link.textContent.trim() || link.getAttribute('aria-label') || 'Unknown Link'; 
+//         const linkHref = link.href || 'unknown'; 
          
-        trackWebflowEvent('link_click', { 
-          category: 'engagement', 
-          label: linkText, 
-          link_url: linkHref, 
-          link_type: link.getAttribute('data-type') || 'general', 
-          consentbit_click_tracking: true 
-        }); 
-      } 
-    }); 
-  } 
+//         trackWebflowEvent('link_click', { 
+//           category: 'engagement', 
+//           label: linkText, 
+//           link_url: linkHref, 
+//           link_type: link.getAttribute('data-type') || 'general', 
+//           consentbit_click_tracking: true 
+//         }); 
+//       } 
+//     }); 
+//   } 
  
   // Helper function to check if analytics consent is given 
   function getConsentBitAnalyticsConsent() { 
@@ -2498,4 +2500,4 @@ categories.push('personalization');
   }); 
  
 })(); 
- 
+</script>
