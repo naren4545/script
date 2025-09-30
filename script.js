@@ -725,7 +725,7 @@ fetch('https://consentbit.narendra-3c5.workers.dev/api/visitor-token', {
       } 
  
  
- 
+   console.log("checkk final")
  
       const fullPayload = { 
         clientId, 
