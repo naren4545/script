@@ -327,6 +327,7 @@ document.querySelector(`script[src="${script.src}"][type="text/javascript"]`);
     } 
   } 
   async function setConsentState(preferences, cookieDays) { 
+   console.log("checkk ")
     ['analytics', 'marketing', 'personalization'].forEach(function (category) { 
       setConsentCookie( 
         'cb-consent-' + category + '_storage', 
@@ -1189,6 +1190,7 @@ ccpaBanner) {
         localStorage.setItem("consent-given", "true"); 
          
         // Enable scripts immediately for better UX 
+         console.log("checkk 1")
         enableAllScriptsWithDataCategory(); 
          
         // Background API calls (non-blocking) 
@@ -1200,7 +1202,7 @@ ccpaBanner) {
           action: 'acceptance',  
           bannerType: locationData ? locationData.bannerType : undefined  
         }; 
-         
+           console.log("checkk 2")
         // Do heavy operations in background 
         Promise.all([ 
           setConsentState(preferences, cookieDays), 
