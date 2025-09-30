@@ -540,7 +540,8 @@ document.querySelector(`script[src="${script.src}"][type="text/javascript"]`);
       tokenRequestInProgress = true; 
  
       const visitorId = await getOrCreateVisitorId(); 
-      const siteName = await cleanHostname(window.location.hostname); 
+      const siteName = document.getElementById('consentbit-site-id').textContent; 
+console.log(siteName)
       const response = await fetch('https://consentbit.narendra-3c5.workers.dev/api/visitor-token', { 
         method: 'POST', 
         headers: { 
