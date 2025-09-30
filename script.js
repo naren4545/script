@@ -1084,7 +1084,10 @@ ccpaBanner) {
         clearVisitorSession(); 
         const retryToken = await getVisitorSessionToken(); 
         if (!retryToken) { 
-          setTimeout(() => location.reload(), 3000); 
+          setTimeout(() =>{ 
+           console.log("problem")
+           // location.reload()
+          }, 3000); 
           return; 
         } 
         localStorage.setItem('visitorSessionToken', retryToken); 
