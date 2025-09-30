@@ -1079,6 +1079,7 @@ ccpaBanner) {
      
     try { 
       const token = await getVisitorSessionToken(); 
+    console.log('Visitor session token:', token);
       if (!token) { 
         clearVisitorSession(); 
         const retryToken = await getVisitorSessionToken(); 
