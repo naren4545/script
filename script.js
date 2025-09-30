@@ -538,10 +538,11 @@ document.querySelector(`script[src="${script.src}"][type="text/javascript"]`);
         return existingToken; 
       } 
  
- 
+  
       tokenRequestInProgress = true; 
- 
+  console.log("problem check4")
       const visitorId = await getOrCreateVisitorId(); 
+      console.log("problem check4", visitorId)
       const siteName = document.getElementById('consentbit-site-id').textContent; 
 console.log(siteName)
       const response = await fetch('https://consentbit.narendra-3c5.workers.dev/api/visitor-token', { 
