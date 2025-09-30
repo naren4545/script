@@ -580,6 +580,7 @@ fetch('https://consentbit.narendra-3c5.workers.dev/api/visitor-token', {
  
           const retryData = await retryResponse.json(); 
           // Store token immediately 
+          console.log(retryData)
           localStorage.setItem('visitorSessionToken', retryData.token); 
           return retryData.token; 
         } 
@@ -588,7 +589,7 @@ fetch('https://consentbit.narendra-3c5.workers.dev/api/visitor-token', {
       } 
  
       const data = await response.json(); 
- 
+  console.log(data)
       localStorage.setItem('visitorSessionToken', data.token); 
       return data.token; 
     } catch (error) { 
