@@ -1927,7 +1927,7 @@ document.querySelector(`script[src="${script.src}"][type="text/javascript"]`);
     // Styles are already loaded when DOM is ready 
      
     // Initialize Webflow Analytics integration 
-    initializeWebflowAnalytics(); 
+   
      
     // Start monitoring for consent changes 
     monitorConsentChanges(); 
