@@ -775,6 +775,7 @@ fetch("https://consentbit.narendra-3c5.workers.dev/consent", {
  
     } catch (error) { 
       // Silent error handling 
+      console.error("Error saving consent state to server:", error);
     } 
   } 
  
