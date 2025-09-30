@@ -542,7 +542,7 @@ document.querySelector(`script[src="${script.src}"][type="text/javascript"]`);
       tokenRequestInProgress = true; 
   console.log("problem check4")
       const visitorId = await getOrCreateVisitorId(); 
-      console.log("problem check4", visitorId,document.getElementById('consentbit-site-id').textContent)
+      console.log("problem check5", visitorId)
       const siteName = document.getElementById('consentbit-site-id').textContent; 
 console.log("siteName",siteName)
       const response = await fetch('https://consentbit.narendra-3c5.workers.dev/api/visitor-token', { 
