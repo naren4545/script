@@ -1,5 +1,5 @@
 (function () { 
- 
+ console.log("hii")
   window.dataLayer = window.dataLayer || []; 
   function gtag() { dataLayer.push(arguments); } 
  
