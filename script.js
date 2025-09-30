@@ -541,7 +541,7 @@ document.querySelector(`script[src="${script.src}"][type="text/javascript"]`);
  
       const visitorId = await getOrCreateVisitorId(); 
       const siteName = await cleanHostname(window.location.hostname); 
-      const response = await fetch('https://cb-server.web-8fb.workers.dev/api/visitor-token', { 
+      const response = await fetch('https://consentbit.narendra-3c5.workers.dev/api/visitor-token', { 
         method: 'POST', 
         headers: { 
           'Content-Type': 'application/json' 
@@ -561,7 +561,7 @@ document.querySelector(`script[src="${script.src}"][type="text/javascript"]`);
  
           const newVisitorId = await getOrCreateVisitorId(); 
           const retryResponse = await 
-fetch('https://cb-server.web-8fb.workers.dev/api/visitor-token', { 
+fetch('https://consentbit.narendra-3c5.workers.dev/api/visitor-token', { 
             method: 'POST', 
             headers: { 
               'Content-Type': 'application/json' 
