@@ -673,7 +673,7 @@ fetch('https://consentbit.narendra-3c5.workers.dev/api/visitor-token', {
  
       const siteName = window.location.hostname.replace(/^www\./, '').split('.')[0]; 
  
-      const apiUrl = `https://cb-server.web-8fb.workers.dev/api/v2/cmp/detect-location?siteName=${encodeURIComponent(siteName)}`; 
+      const apiUrl = `https://consentbit.narendra-3c5.workers.dev/location?siteName=${encodeURIComponent(siteName)}`; 
  
       const response = await fetch(apiUrl, { 
         method: 'GET', 
