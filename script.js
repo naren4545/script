@@ -335,7 +335,7 @@ document.querySelector(`script[src="${script.src}"][type="text/javascript"]`);
         cookieDays || 365 
       ); 
     }); 
- 
+    console.log("checkk  imp ")
     // Save CCPA "do-not-share" preference if it exists 
     if (preferences.hasOwnProperty('doNotShare')) { 
       setConsentCookie( 
