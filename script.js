@@ -1171,6 +1171,7 @@ ccpaBanner) {
     } 
      
     let cookieDays = await fetchCookieExpirationDays(); 
+   console.log("exp", cookieDays )
     const prefs = await getConsentPreferences(); 
     updatePreferenceForm(prefs); 
  
