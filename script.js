@@ -619,9 +619,9 @@ fetch('https://consentbit.narendra-3c5.workers.dev/api/visitor-token', {
     const sessionToken = localStorage.getItem("visitorSessionToken"); 
     if (!sessionToken) return 180; 
     try { 
-      const siteName = window.location.hostname.replace(/^www\./, '').split('.')[0]; 
+    const siteName = document.getElementById('consensite-id').textContent;
       const apiUrl = 
-`https://cb-server.web-8fb.workers.dev/api/app-data?siteName=${encodeURIComponent(siteName)}`; 
+`https://cb-server.web-8fb.workers.dev/banner/get/${encodeURIComponent(siteName)}`; 
       const response = await fetch(apiUrl, { 
         method: "GET", 
         headers: { 
