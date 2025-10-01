@@ -621,7 +621,7 @@ fetch('https://consentbit.narendra-3c5.workers.dev/api/visitor-token', {
     try { 
     const siteName = document.getElementById('consensite-id').textContent;
       const apiUrl = 
-`https://consentbit.narendra-3c5.workers.dev//banner/get/${encodeURIComponent(siteName)}`; 
+`https://consentbit.narendra-3c5.workers.dev/banner/get/${encodeURIComponent(siteName)}`; 
       const response = await fetch(apiUrl, { 
         method: "GET", 
         headers: { 
@@ -631,8 +631,8 @@ fetch('https://consentbit.narendra-3c5.workers.dev/api/visitor-token', {
       }); 
       if (!response.ok) return 180; 
       const data = await response.json(); 
-      if (data && data.cookieExpiration !== null && data.cookieExpiration !== undefined) { 
-        return parseInt(data.cookieExpiration, 10); 
+      if (data && data.settings.expires !== null && data.settings.expires !== undefined) { 
+        return parseInt(data.settings.expires, 10); 
       } 
       return 180; 
     } catch { 
