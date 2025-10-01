@@ -328,38 +328,41 @@ document.querySelector(`script[src="${script.src}"][type="text/javascript"]`);
       }); 
     } 
   } 
-  async function setConsentState(preferences, cookieDays) { 
-   console.log("checkk ",preferences)
-  ['analytics', 'marketing', 'personalization'].forEach(function (category) { 
-  try {
-    console.log("Setting cookie for:", category, "=", preferences[category]);
-    setConsentCookie(
-      'cb-consent-' + category + '_storage',
-      preferences[category] ? 'true' : 'false',
-      cookieDays || 365
-    );
-  } catch (err) {
-    console.error("Error setting cookie for", category, err);
+async function setConsentState(preferences, cookieDays = 365) {
+  console.log("checkk", preferences);
+  if (!preferences || typeof preferences !== 'object') {
+    console.error("setConsentState failed: Invalid or missing preferences");
+    return;
   }
-});
-    console.log("checkk  imp ")
-    // Save CCPA "do-not-share" preference if it exists 
-    if (preferences.hasOwnProperty('doNotShare')) { 
-      setConsentCookie( 
-        'cb-consent-donotshare', 
-        preferences.doNotShare ? 'true' : 'false', 
-        cookieDays || 365 
-      ); 
-    } 
- 
-    // Store encrypted preferences in localStorage 
-    await storeEncryptedPreferences(preferences); 
- 
-    updateGtagConsent(preferences); 
-    const expiresAt = Date.now() + (cookieDays * 24 * 60 * 60 * 1000); 
-    localStorage.setItem('consentExpiresAt', expiresAt.toString()); 
-    localStorage.setItem('consentExpirationDays', cookieDays.toString()); 
-  } 
+  const consentCategories = ['analytics', 'marketing', 'personalization', 'doNotShare'];
+
+  for (const category of consentCategories) {
+    if (preferences.hasOwnProperty(category)) {
+      try {
+        const cookieName = category === 'doNotShare'
+          ? 'cb-consent-donotshare'
+          : `cb-consent-${category}_storage`;
+        const cookieValue = preferences[category] ? 'true' : 'false';
+        setConsentCookie(cookieName, cookieValue, cookieDays);
+      } catch (err) {
+        console.error(`Error setting cookie for "${category}"`, err);
+      }
+    }
+  }
+
+  try {
+    await storeEncryptedPreferences(preferences);
+    updateGtagConsent(preferences);
+    const DAY_IN_MILLISECONDS = 24 * 60 * 60 * 1000;
+    const expiresAt = Date.now() + (cookieDays * DAY_IN_MILLISECONDS);
+    localStorage.setItem('consentExpiresAt', expiresAt.toString());
+    localStorage.setItem('consentExpirationDays', cookieDays.toString());
+
+    console.log("Consent state was successfully saved.");
+  } catch (err) {
+    console.error("Failed to store preferences or update gtag:", err);
+  }
+}
   // Encrypt and store preferences in localStorage 
   async function storeEncryptedPreferences(preferences) { 
     try { 
