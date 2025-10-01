@@ -19,6 +19,7 @@
  
  
   function setConsentCookie(name, value, days) { 
+   console.log(" setConsentCookie")
     let expires = ""; 
     if (days) { 
       const date = new Date(); 
@@ -30,6 +31,7 @@
       cookieString += "; Secure"; 
     } 
     document.cookie = cookieString; 
+    console.log(" setConsentCookie done")
   } 
   function getConsentCookie(name) { 
     const value = `; ${document.cookie}`; 
