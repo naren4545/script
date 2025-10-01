@@ -329,7 +329,7 @@ document.querySelector(`script[src="${script.src}"][type="text/javascript"]`);
     } 
   } 
   async function setConsentState(preferences, cookieDays) { 
-   console.log("checkk ")
+   console.log("checkk ",preferences)
     ['analytics', 'marketing', 'personalization'].forEach(function (category) { 
       setConsentCookie( 
         'cb-consent-' + category + '_storage', 
