@@ -330,13 +330,18 @@ document.querySelector(`script[src="${script.src}"][type="text/javascript"]`);
   } 
   async function setConsentState(preferences, cookieDays) { 
    console.log("checkk ",preferences)
-    ['analytics', 'marketing', 'personalization'].forEach(function (category) { 
-      setConsentCookie( 
-        'cb-consent-' + category + '_storage', 
-        preferences[category] ? 'true' : 'false', 
-        cookieDays || 365 
-      ); 
-    }); 
+  ['analytics', 'marketing', 'personalization'].forEach(function (category) { 
+  try {
+    console.log("Setting cookie for:", category, "=", preferences[category]);
+    setConsentCookie(
+      'cb-consent-' + category + '_storage',
+      preferences[category] ? 'true' : 'false',
+      cookieDays || 365
+    );
+  } catch (err) {
+    console.error("Error setting cookie for", category, err);
+  }
+});
     console.log("checkk  imp ")
     // Save CCPA "do-not-share" preference if it exists 
     if (preferences.hasOwnProperty('doNotShare')) { 
