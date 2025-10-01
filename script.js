@@ -621,7 +621,7 @@ fetch('https://consentbit.narendra-3c5.workers.dev/api/visitor-token', {
     try { 
     const siteName = document.getElementById('consensite-id').textContent;
       const apiUrl = 
-`https://cb-server.web-8fb.workers.dev/banner/get/${encodeURIComponent(siteName)}`; 
+`https://consentbit.narendra-3c5.workers.dev//banner/get/${encodeURIComponent(siteName)}`; 
       const response = await fetch(apiUrl, { 
         method: "GET", 
         headers: { 
