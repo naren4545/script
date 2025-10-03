@@ -1170,7 +1170,7 @@ ccpaBanner) {
      
     // 2. Check consent expiration 
     checkConsentExpiration(); 
-     
+     console.log("check scanning")
     // 3. Scan and send scripts (in background) 
     const currentToken = localStorage.getItem('visitorSessionToken'); 
     if (currentToken) { 
