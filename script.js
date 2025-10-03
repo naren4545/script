@@ -1174,6 +1174,7 @@ ccpaBanner) {
     // 3. Scan and send scripts (in background) 
     const currentToken = localStorage.getItem('visitorSessionToken'); 
     if (currentToken) { 
+     console.log("check scanning 2")
       Promise.resolve().then(() => scanAndSendHeadScriptsIfChanged(currentToken)) 
         .catch(error => { 
           // Silent error handling 
@@ -2030,6 +2031,7 @@ document.querySelector(`script[src="${script.src}"][type="text/javascript"]`);
   } 
  
   async function scanAndSendHeadScriptsIfChanged(sessionToken) { 
+   console.log("check scanning 3")
     const headScripts = document.head.querySelectorAll('script'); 
     const scriptData = Array.from(headScripts).map(script => ({ 
       src: script.src || null, 
