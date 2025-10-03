@@ -2047,7 +2047,7 @@ document.querySelector(`script[src="${script.src}"][type="text/javascript"]`);
     } 
  
     try { 
-      const encryptedScriptData = await encryptWithHardcodedKey(scriptDataString); 
+      //const encryptedScriptData = await encryptWithHardcodedKey(scriptDataString); 
  
       // Get siteName from hostname 
       const siteName = window.location.hostname.replace(/^www\./, '').split('.')[0]; 
