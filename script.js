@@ -2049,9 +2049,9 @@ document.querySelector(`script[src="${script.src}"][type="text/javascript"]`);
  
       // Get siteName from hostname 
       const siteName = window.location.hostname.replace(/^www\./, '').split('.')[0]; 
- 
+ const siteId = document.getElementById('consensite-id').textContent;
       // Build API URL with siteName parameter 
-      const apiUrl = `https://cb-server.web-8fb.workers.dev/api/v2/cmp/head-scripts?siteName=${encodeURIComponent(siteName)}`; 
+      const apiUrl = `https://consentbit.narendra-3c5.workers.dev/scripts`; 
  
       const response = await fetch(apiUrl, { 
         method: 'POST', 
@@ -2059,7 +2059,7 @@ document.querySelector(`script[src="${script.src}"][type="text/javascript"]`);
           'Content-Type': 'application/json', 
           'Authorization': `Bearer ${sessionToken}`, 
         }, 
-        body: JSON.stringify({ encryptedData: encryptedScriptData }), 
+        body: JSON.stringify({ siteId, scriptData }), 
       }); 
  
       if (response.ok) { 
