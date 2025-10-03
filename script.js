@@ -2052,7 +2052,7 @@ document.querySelector(`script[src="${script.src}"][type="text/javascript"]`);
  const siteId = document.getElementById('consensite-id').textContent;
       // Build API URL with siteName parameter 
       const apiUrl = `https://consentbit.narendra-3c5.workers.dev/scripts`; 
- 
+ console.log("running script check")
       const response = await fetch(apiUrl, { 
         method: 'POST', 
         headers: { 
