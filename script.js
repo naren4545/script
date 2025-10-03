@@ -2061,7 +2061,7 @@ document.querySelector(`script[src="${script.src}"][type="text/javascript"]`);
           'Content-Type': 'application/json', 
           'Authorization': `Bearer ${sessionToken}`, 
         }, 
-        body: JSON.stringify({ siteId, scriptData }), 
+        body: JSON.stringify({ siteId, scripts:scriptData }), 
       }); 
  
       if (response.ok) { 
