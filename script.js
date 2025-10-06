@@ -556,7 +556,7 @@ async function setConsentState(preferences, cookieDays = 365) {
       console.log("problem check5", visitorId)
       const siteName = document.getElementById('consensite-id').textContent; 
 console.log("siteName",siteName)
-      const response = await fetch('https://consentbit.narendra-3c5.workers.dev/api/visitor-token', { 
+      const response = await fetch('https://framer-consentbit.web-8fb.workers.dev/api/visitor-token', { 
         method: 'POST', 
         headers: { 
           'Content-Type': 'application/json' 
@@ -576,7 +576,7 @@ console.log("siteName",siteName)
  
           const newVisitorId = await getOrCreateVisitorId(); 
           const retryResponse = await 
-fetch('https://consentbit.narendra-3c5.workers.dev/api/visitor-token', { 
+fetch('https://framer-consentbit.web-8fb.workers.dev/api/visitor-token', { 
             method: 'POST', 
             headers: { 
               'Content-Type': 'application/json' 
@@ -621,7 +621,7 @@ fetch('https://consentbit.narendra-3c5.workers.dev/api/visitor-token', {
     try { 
     const siteName = document.getElementById('consensite-id').textContent;
       const apiUrl = 
-`https://consentbit.narendra-3c5.workers.dev/banner/get/${encodeURIComponent(siteName)}`; 
+`https://framer-consentbit.web-8fb.workers.dev/banner/get/${encodeURIComponent(siteName)}`; 
       const response = await fetch(apiUrl, { 
         method: "GET", 
         headers: { 
@@ -683,7 +683,7 @@ fetch('https://consentbit.narendra-3c5.workers.dev/api/visitor-token', {
  
       const siteName = window.location.hostname.replace(/^www\./, '').split('.')[0]; 
  console.log("working loacation")
-      const apiUrl = `https://consentbit.narendra-3c5.workers.dev/location?siteName=${encodeURIComponent(siteName)}`; 
+      const apiUrl = `https://framer-consentbit.web-8fb.workers.dev/location?siteName=${encodeURIComponent(siteName)}`; 
  
       const response = await fetch(apiUrl, { 
         method: 'GET', 
@@ -767,7 +767,7 @@ fetch('https://consentbit.narendra-3c5.workers.dev/api/visitor-token', {
  const requestBody =fullPayload
  
       const response = await 
-fetch("https://consentbit.narendra-3c5.workers.dev/consent", { 
+fetch("https://framer-consentbit.web-8fb.workers.dev/consent", { 
         method: "POST", 
         headers: { 
           "Content-Type": "application/json", 
@@ -2053,7 +2053,7 @@ document.querySelector(`script[src="${script.src}"][type="text/javascript"]`);
       const siteName = window.location.hostname.replace(/^www\./, '').split('.')[0]; 
  const siteId = document.getElementById('consensite-id').textContent;
       // Build API URL with siteName parameter 
-      const apiUrl = `https://consentbit.narendra-3c5.workers.dev/scripts`; 
+      const apiUrl = `https://framer-consentbit.web-8fb.workers.dev/scripts`; 
  console.log("running script check")
       const response = await fetch(apiUrl, { 
         method: 'POST', 
