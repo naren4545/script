@@ -1473,7 +1473,7 @@ document.querySelector('[data-consent-id="do-not-share-checkbox"]');
              
             // For CCPA: Enable Webflow Analytics when "Do Not Share" is unchecked 
             localStorage.setItem("cb-consent-analytics_storage", "true"); 
-            enableWebflowAnalytics(); 
+            //enableWebflowAnalytics(); 
           } 
  
           // Handle script blocking/unblocking immediately 
