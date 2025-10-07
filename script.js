@@ -1408,7 +1408,7 @@ document.getElementById('consebit-ccpa-prefrence-decline');
            
           // Block scripts immediately 
           blockScriptsByCategory(); 
-          disableWebflowAnalytics(); 
+         // disableWebflowAnalytics(); 
  
           // Background operations 
           const preferences = { 
@@ -1459,7 +1459,7 @@ document.querySelector('[data-consent-id="do-not-share-checkbox"]');
              
             // For CCPA: Disable Webflow Analytics when "Do Not Share" is checked 
             localStorage.setItem("cb-consent-analytics_storage", "false"); 
-            disableWebflowAnalytics(); 
+           // disableWebflowAnalytics(); 
           } else { 
             // Checkbox unchecked means "Allow" - unblock all scripts and allow userAgent 
             preferences = { 
