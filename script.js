@@ -1326,7 +1326,7 @@ document.querySelector('[data-consent-id="do-not-share-checkbox"]');
  
             // For CCPA: Disable Webflow Analytics when "Do Not Share" is checked 
             localStorage.setItem("cb-consent-analytics_storage", "false"); 
-            disableWebflowAnalytics(); 
+            //disableWebflowAnalytics(); 
  
             // Apply law-specific blocking based on banner type 
             if (locationData && ["VCDPA", "CPA", "CTDPA", 
@@ -1354,7 +1354,7 @@ document.querySelector('[data-consent-id="do-not-share-checkbox"]');
              
             // For CCPA: Enable Webflow Analytics when "Do Not Share" is unchecked 
             localStorage.setItem("cb-consent-analytics_storage", "true"); 
-            enableWebflowAnalytics(); 
+            //enableWebflowAnalytics(); 
              
             // Unblock all scripts 
             unblockScriptsWithDataCategory(); 
