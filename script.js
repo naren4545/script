@@ -897,7 +897,7 @@ checkboxName.toLowerCase().includes('functional')) {
   } 
   function isStagingHostname() { 
     const hostname = window.location.hostname; 
-    return hostname.includes('.webflow.io') || hostname.includes('localhost') || 
+    return hostname.includes('.framer.app') || hostname.includes('localhost') || 
 hostname.includes('127.0.0.1'); 
   } 
  
