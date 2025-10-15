@@ -1083,6 +1083,7 @@ ccpaBanner && !document.getElementById("consensite-banner-type").textContent.toL
             updateCCPAPreferenceForm(preferences); 
           }, 100); 
         } else if (consentBanner) { 
+         console.log("working fine")
           hideAllBanners(); 
           showBanner(consentBanner); 
         } 
