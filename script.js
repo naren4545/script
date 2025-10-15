@@ -1928,8 +1928,8 @@ document.querySelector(`script[src="${script.src}"][type="text/javascript"]`);
                   // For CCPA/US Privacy Laws: Scripts start enabled but banner must be shown 
           // User must explicitly accept or decline through banner interaction 
  
-        showBanner(document.getElementById("initial-consent-banner")); 
-        hideBanner(document.getElementById("consent-banner")); 
+        !document.getElementById("consensite-banner-type").textContent.toLowerCase().includes("gdpr") && showBanner(document.getElementById("initial-consent-banner")); 
+       !document.getElementById("consensite-banner-type").textContent.toLowerCase().includes("gdpr") && hideBanner(document.getElementById("consent-banner")); 
  
  
               } else { 
