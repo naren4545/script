@@ -1075,6 +1075,7 @@ personalizationConsent === "false") {
         if (locationData && (["CCPA", "VCDPA", "CPA", "CTDPA", 
 "UCPA"].includes(locationData.bannerType) || locationData.country === "US") && 
 ccpaBanner && !document.getElementById("consensite-banner-type").textContent.toLowerCase().includes("gdpr")) { 
+          console.log("working fine 1")
           hideAllBanners(); 
           showBanner(ccpaBanner); 
  
