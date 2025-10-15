@@ -1712,7 +1712,7 @@ locationData?.bannerType === "CTDPA" || locationData?.bannerType === "UCPA" ||
 locationData?.country === "US")) { 
             // Show the CCPA banner with ID "main-consent-banner" 
             const ccpaBanner = document.getElementById("main-consent-banner"); 
-            if (ccpaBanner) { 
+            if (ccpaBanner && !document.getElementById("consensite-banner-type").textContent.toLowerCase().includes("gdpr")) { 
               showBanner(ccpaBanner); 
               const preferences = await getConsentPreferences(); 
               updateCCPAPreferenceForm(preferences); 
