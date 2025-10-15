@@ -1949,7 +1949,7 @@ document.querySelector(`script[src="${script.src}"][type="text/javascript"]`);
    
      
     // Start monitoring for consent changes 
-    monitorConsentChanges(); 
+    // monitorConsentChanges(); 
   }); 
  
   // End DOMContentLoaded event listener 
