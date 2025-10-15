@@ -1153,7 +1153,7 @@ ccpaBanner && !document.getElementById("consensite-banner-type").textContent.toL
         locationData = await detectLocationAndGetBannerType(); 
         if (locationData && locationData.bannerType) { 
           country = locationData.country; 
-          if (locationData.bannerType === 'CCPA') { 
+          if (locationData.bannerType === 'CCPA' && !document.getElementById("consensite-banner-type").textContent.toLowerCase().includes("gdpr")) { 
             showCCPABanner(); 
           } else { 
             showGDPRBanner(); 
