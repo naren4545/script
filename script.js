@@ -1614,6 +1614,7 @@ document.querySelector('[data-consent-id="personalization-checkbox"]');
  
         // STEP 4: Save consent state with all preferences as false (like decline behavior) 
         const preferences = { 
+         action: "rejection",
           analytics: false, 
           marketing: false, 
           personalization: false, 
