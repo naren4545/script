@@ -416,15 +416,27 @@ async function setConsentState(preferences, cookieDays = 365) {
       doNotShare: getConsentCookie('cb-consent-donotshare') === 'true'  // Convert to camelCase for consistency 
     }; 
   } 
-  function showBanner(banner) { 
-    if (banner) { 
-      banner.style.setProperty("display", "block", "important"); 
-      banner.style.setProperty("visibility", "visible", "important"); 
-      banner.style.setProperty("opacity", "1", "important"); 
-      banner.classList.add("show-banner"); 
-      banner.classList.remove("hidden"); 
-    } 
-  } 
+  // function showBanner(banner) { 
+  //   if (banner) { 
+  //     banner.style.setProperty("display", "block", "important"); 
+  //     banner.style.setProperty("visibility", "visible", "important"); 
+  //     banner.style.setProperty("opacity", "1", "important"); 
+  //     banner.classList.add("show-banner"); 
+  //     banner.classList.remove("hidden"); 
+  //   } 
+  // } 
+
+ function showBanner(banner) {
+  if (!banner) return;
+
+  document.fonts.ready.then(() => {
+    banner.style.setProperty("display", "block", "important");
+    banner.style.setProperty("visibility", "visible", "important");
+    banner.style.setProperty("opacity", "1", "important");
+    banner.classList.add("show-banner");
+    banner.classList.remove("hidden");
+  });
+}
   function hideBanner(banner) { 
     if (banner) { 
       banner.style.setProperty("display", "none", "important"); 
