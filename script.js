@@ -445,6 +445,7 @@ function showBanner(banner) {
     banner.classList.add("show-banner");
     banner.classList.remove("hidden");
   });
+}
 
   function hideBanner(banner) { 
     if (banner) { 
