@@ -416,42 +416,17 @@ async function setConsentState(preferences, cookieDays = 365) {
       doNotShare: getConsentCookie('cb-consent-donotshare') === 'true'  // Convert to camelCase for consistency 
     }; 
   } 
-  // function showBanner(banner) { 
-  //   if (banner) { 
-  //     banner.style.setProperty("display", "block", "important"); 
-  //     banner.style.setProperty("visibility", "visible", "important"); 
-  //     banner.style.setProperty("opacity", "1", "important"); 
-  //     banner.classList.add("show-banner"); 
-  //     banner.classList.remove("hidden"); 
-  //   } 
-  // } 
+  function showBanner(banner) { 
+    if (banner) { 
+      banner.style.setProperty("display", "block", "important"); 
+      banner.style.setProperty("visibility", "visible", "important"); 
+      banner.style.setProperty("opacity", "1", "important"); 
+      banner.classList.add("show-banner"); 
+      banner.classList.remove("hidden"); 
+    } 
+  } 
 
-function showBanner(banner) {
-  if (!banner) return;
 
-  console.log('Waiting for fonts and script ready...');
-  Promise.all([
-    document.fonts.ready,
-    new Promise((resolve) => {
-      if (window.myScriptInitialized) {
-        console.log('Script already initialized');
-        resolve();
-      } else {
-        console.log('Waiting for script init event');
-        document.addEventListener('myScriptInitEvent', () => {
-          console.log('Script init event received');
-          resolve();
-        });
-      }
-    })
-  ]).then(() => {
-    console.log('Showing banner now');
-    banner.style.setProperty("visibility", "visible", "important");
-    banner.style.setProperty("opacity", "1", "important");
-    banner.classList.add("show-banner");
-    banner.classList.remove("hidden");
-  });
-}
 
   function hideBanner(banner) { 
     if (banner) { 
