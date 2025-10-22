@@ -1027,25 +1027,68 @@ personalizationConsent === "false") {
   } 
  
   
-  async function disableScrollOnSite(){ 
-    const scrollControl = document.querySelector('[scroll-control="true"]'); 
-    function toggleScrolling() { 
-      const banner = document.querySelector('[data-cookie-banner="true"]'); 
-      if (!banner) return; 
-      const observer = new MutationObserver(() => { 
-        const isVisible = window.getComputedStyle(banner).display !== "none"; 
-        document.body.style.overflow = isVisible ? "hidden" : ""; 
-      }); 
-      // Initial check on load 
-      const isVisible = window.getComputedStyle(banner).display !== "none"; 
-      document.body.style.overflow = isVisible ? "hidden" : ""; 
-      observer.observe(banner, { attributes: true, attributeFilter: ["style", "class"] }); 
-    } 
-    if (scrollControl) { 
-      toggleScrolling(); 
-    } 
-  } 
- 
+  // async function disableScrollOnSite(){ 
+  //   const scrollControl = document.querySelector('[scroll-control="true"]'); 
+  //   function toggleScrolling() { 
+  //     const banner = document.querySelector('[data-cookie-banner="true"]'); 
+  //     if (!banner) return; 
+  //     const observer = new MutationObserver(() => { 
+  //       const isVisible = window.getComputedStyle(banner).display !== "none"; 
+  //       document.body.style.overflow = isVisible ? "hidden" : ""; 
+  //     }); 
+  //     // Initial check on load 
+  //     const isVisible = window.getComputedStyle(banner).display !== "none"; 
+  //     document.body.style.overflow = isVisible ? "hidden" : ""; 
+  //     observer.observe(banner, { attributes: true, attributeFilter: ["style", "class"] }); 
+  //   } 
+  //   if (scrollControl) { 
+  //     toggleScrolling(); 
+  //   } 
+  // } 
+ async function disableScrollOnSite() {
+  const scrollControl = document.querySelector('[scroll-control="true"]');
+
+  function lockScroll() {
+    const scrollY = window.scrollY;
+    document.documentElement.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden';
+    document.body.style.position = 'fixed';
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.width = '100%';
+    document.body.dataset.scrollY = scrollY; // store scroll position
+  }
+
+  function unlockScroll() {
+    const scrollY = parseInt(document.body.dataset.scrollY || '0', 10);
+    document.documentElement.style.overflow = '';
+    document.body.style.overflow = '';
+    document.body.style.position = '';
+    document.body.style.top = '';
+    document.body.style.width = '';
+    window.scrollTo(0, scrollY); // restore scroll
+  }
+
+  function toggleScrolling() {
+    const banner = document.querySelector('[data-cookie-banner="true"]');
+    if (!banner) return;
+
+    const observer = new MutationObserver(() => {
+      const isVisible = window.getComputedStyle(banner).display !== 'none';
+      if (isVisible) lockScroll();
+      else unlockScroll();
+    });
+
+    // Initial check
+    const isVisible = window.getComputedStyle(banner).display !== 'none';
+    if (isVisible) lockScroll();
+    else unlockScroll();
+
+    observer.observe(banner, { attributes: true, attributeFilter: ["style", "class"] });
+  }
+
+  if (scrollControl) toggleScrolling();
+}
+
   document.addEventListener('DOMContentLoaded', async function () { 
     await hideAllBanners(); 
    // await checkConsentExpiration(); 
