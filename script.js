@@ -429,17 +429,23 @@ async function setConsentState(preferences, cookieDays = 365) {
 function showBanner(banner) {
   if (!banner) return;
 
+  console.log('Waiting for fonts and script ready...');
   Promise.all([
     document.fonts.ready,
     new Promise((resolve) => {
-      // Example: wait for your controlling script to load or init
       if (window.myScriptInitialized) {
+        console.log('Script already initialized');
         resolve();
       } else {
-        document.addEventListener('myScriptInitEvent', resolve);
+        console.log('Waiting for script init event');
+        document.addEventListener('myScriptInitEvent', () => {
+          console.log('Script init event received');
+          resolve();
+        });
       }
     })
   ]).then(() => {
+    console.log('Showing banner now');
     banner.style.setProperty("visibility", "visible", "important");
     banner.style.setProperty("opacity", "1", "important");
     banner.classList.add("show-banner");
