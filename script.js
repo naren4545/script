@@ -1049,7 +1049,7 @@ personalizationConsent === "false") {
   //   } 
   // } 
  async function disableScrollOnSite() {
-  const scrollControl = document.querySelector('[scroll-control="true"]');
+ const scrollControls = document.querySelectorAll('[scroll-control="true"]');
 
   function lockScroll() {
     const scrollY = window.scrollY;
@@ -1089,7 +1089,7 @@ personalizationConsent === "false") {
     observer.observe(banner, { attributes: true, attributeFilter: ["style", "class"] });
   }
 
-  if (scrollControl) toggleScrolling();
+ scrollControls?.forEach(() => toggleScrolling());
 }
 
   document.addEventListener('DOMContentLoaded', async function () { 
