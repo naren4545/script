@@ -1048,61 +1048,38 @@ personalizationConsent === "false") {
   //     toggleScrolling(); 
   //   } 
   // } 
- async function disableScrollOnSite() {
+async function disableScrollOnSite() {
   const scrollControl = document.querySelector('[scroll-control="true"]');
 
-  function lockScroll() {
-    const scrollY = window.scrollY;
-    document.documentElement.style.overflow = 'hidden';
-    document.body.style.overflow = 'hidden';
-    document.body.style.position = 'fixed';
-    document.body.style.top = `-${scrollY}px`;
-    document.body.style.width = '100%';
-    document.body.dataset.scrollY = scrollY; // store scroll position
-  }
-
-  function unlockScroll() {
-    const scrollY = parseInt(document.body.dataset.scrollY || '0', 10);
-    document.documentElement.style.overflow = '';
-    document.body.style.overflow = '';
-    document.body.style.position = '';
-    document.body.style.top = '';
-    document.body.style.width = '';
-    window.scrollTo(0, scrollY); // restore scroll
-  }
-
- function toggleScrolling() {
-  let banners = document.querySelectorAll('[data-cookie-banner="true"]');
-  const parent = banners.length ? banners[0].parentNode : document.body;
-
   function anyBannerVisible() {
-    banners = document.querySelectorAll('[data-cookie-banner="true"]');
+    const banners = document.querySelectorAll('[data-cookie-banner="true"]');
     return Array.from(banners).some(banner =>
-      window.getComputedStyle(banner).display !== 'none'
+      window.getComputedStyle(banner).display !== "none"
     );
   }
 
-  function mutationHandler() {
-    banners = document.querySelectorAll('[data-cookie-banner="true"]');
-    const visible = anyBannerVisible();
-    if (banners.length && visible) lockScroll();
-    else unlockScroll();
+  function updateScrollLock() {
+    document.body.style.overflow = anyBannerVisible() ? "hidden" : "";
   }
 
-  // Initial check
-  mutationHandler();
+  function toggleScrolling() {
+    updateScrollLock();
 
-  const observer = new MutationObserver(mutationHandler);
-  // Observe attributes and childList for dynamic changes
-  observer.observe(parent, { childList: true, subtree: true });
-  banners.forEach(banner => {
-    observer.observe(banner, { attributes: true, attributeFilter: ["style", "class"] });
-  });
+    // Observe the body (or a specific parent if you know it) for child and attribute changes
+    const observer = new MutationObserver(updateScrollLock);
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["style", "class"]
+    });
+  }
+
+  if (scrollControl) {
+    toggleScrolling();
+  }
 }
 
-
-  if (scrollControl) toggleScrolling();
-}
   document.addEventListener('DOMContentLoaded', async function () { 
     await hideAllBanners(); 
    // await checkConsentExpiration(); 
