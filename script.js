@@ -1086,10 +1086,7 @@ async function disableScrollOnSite() {
   function isElementVisible(el) {
     const style = window.getComputedStyle(el);
     return (
-      style.display !== 'none' &&
-      style.visibility !== 'hidden' &&
-      style.opacity !== '0' &&
-      el.offsetParent !== null
+      style.display !== "none"
     );
   }
 
