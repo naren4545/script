@@ -1052,23 +1052,33 @@ async function disableScrollOnSite() {
   const scrollControl = document.querySelector('[scroll-control="true"]');
   if (!scrollControl) return;
 
-  let banners = document.querySelectorAll('[data-cookie-banner="true"]');
-  const parent = banners.length ? banners[0].parentNode : document.body;
   let bannerObservers = [];
 
-  function anyBannerVisible() {
-    banners = document.querySelectorAll('[data-cookie-banner="true"]');
-    return Array.from(banners).some(
-      banner => window.getComputedStyle(banner).display !== 'none'
-    );
-  }
-
   function lockScroll() {
+    const scrollY = window.scrollY;
+    document.documentElement.style.overflow = 'hidden';
     document.body.style.overflow = 'hidden';
+    document.body.style.position = 'fixed';
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.width = '100%';
+    document.body.dataset.scrollY = scrollY;
   }
 
   function unlockScroll() {
+    const scrollY = parseInt(document.body.dataset.scrollY || '0', 10);
+    document.documentElement.style.overflow = '';
     document.body.style.overflow = '';
+    document.body.style.position = '';
+    document.body.style.top = '';
+    document.body.style.width = '';
+    window.scrollTo(0, scrollY);
+  }
+
+  function anyBannerVisible() {
+    const banners = document.querySelectorAll('[data-cookie-banner="true"]');
+    return Array.from(banners).some(
+      banner => window.getComputedStyle(banner).display !== 'none'
+    );
   }
 
   function cleanupBannerObservers() {
@@ -1076,30 +1086,28 @@ async function disableScrollOnSite() {
     bannerObservers = [];
   }
 
-  function observeCurrentBanners() {
+  function observeAllBanners(mutationHandler) {
     cleanupBannerObservers();
+    const banners = document.querySelectorAll('[data-cookie-banner="true"]');
     banners.forEach(banner => {
       const obs = new MutationObserver(mutationHandler);
-      obs.observe(banner, { attributes: true, attributeFilter: ['style', 'class'] });
+      obs.observe(banner, { attributes: true, attributeFilter: ["style", "class"] });
       bannerObservers.push(obs);
     });
   }
 
   function mutationHandler() {
-    banners = document.querySelectorAll('[data-cookie-banner="true"]');
-    observeCurrentBanners();
-    const visible = anyBannerVisible();
-    if (banners.length && visible) {
-      lockScroll();
-    } else {
-      unlockScroll();
-    }
+    observeAllBanners(mutationHandler);
+    if (anyBannerVisible()) lockScroll();
+    else unlockScroll();
   }
 
-  // Initial check and observer setup
+  // Initial setup
   mutationHandler();
 
-  // Observe parent element for dynamic banner addition/removal
+  // Also observe parent for DOM additions/removals
+  const banners = document.querySelectorAll('[data-cookie-banner="true"]');
+  const parent = banners.length ? banners[0].parentNode : document.body;
   const parentObserver = new MutationObserver(mutationHandler);
   parentObserver.observe(parent, { childList: true, subtree: true });
 }
