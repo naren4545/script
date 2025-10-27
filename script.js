@@ -1048,27 +1048,30 @@ personalizationConsent === "false") {
   //     toggleScrolling(); 
   //   } 
   // } 
-function toggleScrolling() {
+async function disableScrollOnSite() {
+  const scrollControl = document.querySelector('[scroll-control="true"]');
+  if (!scrollControl) return;
+
   let banners = document.querySelectorAll('[data-cookie-banner="true"]');
   const parent = banners.length ? banners[0].parentNode : document.body;
   let bannerObservers = [];
 
   function anyBannerVisible() {
     banners = document.querySelectorAll('[data-cookie-banner="true"]');
-    return Array.from(banners).some(banner =>
-      window.getComputedStyle(banner).display !== 'none'
+    return Array.from(banners).some(
+      banner => window.getComputedStyle(banner).display !== 'none'
     );
   }
 
   function lockScroll() {
     document.body.style.overflow = 'hidden';
   }
+
   function unlockScroll() {
     document.body.style.overflow = '';
   }
 
   function cleanupBannerObservers() {
-    // Disconnect previous banner observers
     bannerObservers.forEach(obs => obs.disconnect());
     bannerObservers = [];
   }
@@ -1077,23 +1080,26 @@ function toggleScrolling() {
     cleanupBannerObservers();
     banners.forEach(banner => {
       const obs = new MutationObserver(mutationHandler);
-      obs.observe(banner, { attributes: true, attributeFilter: ["style", "class"] });
+      obs.observe(banner, { attributes: true, attributeFilter: ['style', 'class'] });
       bannerObservers.push(obs);
     });
   }
 
   function mutationHandler() {
     banners = document.querySelectorAll('[data-cookie-banner="true"]');
-    observeCurrentBanners(); // re-attach observers as banners may have changed
+    observeCurrentBanners();
     const visible = anyBannerVisible();
-    if (banners.length && visible) lockScroll();
-    else unlockScroll();
+    if (banners.length && visible) {
+      lockScroll();
+    } else {
+      unlockScroll();
+    }
   }
 
-  // Initial setup
+  // Initial check and observer setup
   mutationHandler();
 
-  // Main observer for banner additions/removals
+  // Observe parent element for dynamic banner addition/removal
   const parentObserver = new MutationObserver(mutationHandler);
   parentObserver.observe(parent, { childList: true, subtree: true });
 }
