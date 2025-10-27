@@ -1050,7 +1050,6 @@ personalizationConsent === "false") {
   // } 
 async function disableScrollOnSite() {
   const scrollControl = document.querySelector('[scroll-control="true"]');
-  if (!scrollControl) return;
 
   function lockScroll() {
     const scrollY = window.scrollY;
@@ -1059,7 +1058,7 @@ async function disableScrollOnSite() {
     document.body.style.position = 'fixed';
     document.body.style.top = `-${scrollY}px`;
     document.body.style.width = '100%';
-    document.body.dataset.scrollY = scrollY;
+    document.body.dataset.scrollY = scrollY; // store scroll position
   }
 
   function unlockScroll() {
@@ -1069,37 +1068,29 @@ async function disableScrollOnSite() {
     document.body.style.position = '';
     document.body.style.top = '';
     document.body.style.width = '';
-    window.scrollTo(0, scrollY);
-  }
-
-  function anyBannerVisible() {
-    const banners = document.querySelectorAll('[data-cookie-banner="true"]');
-    return Array.from(banners).some(banner => 
-      window.getComputedStyle(banner).display !== 'none'
-    );
+    window.scrollTo(0, scrollY); // restore scroll
   }
 
   function toggleScrolling() {
-    const banners = document.querySelectorAll('[data-cookie-banner="true"]');
-    if (!banners.length) return;
+    const banner = document.querySelector('[data-cookie-banner="true"]');
+    if (!banner) return;
 
     const observer = new MutationObserver(() => {
-      if (anyBannerVisible()) lockScroll();
+      const isVisible = window.getComputedStyle(banner).display !== 'none';
+      if (isVisible) lockScroll();
       else unlockScroll();
     });
 
     // Initial check
-    if (anyBannerVisible()) lockScroll();
+    const isVisible = window.getComputedStyle(banner).display !== 'none';
+    if (isVisible) lockScroll();
     else unlockScroll();
 
-    banners.forEach(banner => {
-      observer.observe(banner, { attributes: true, attributeFilter: ['style', 'class'] });
-    });
+    observer.observe(banner, { attributes: true, attributeFilter: ["style", "class"] });
   }
 
-  toggleScrolling();
+  if (scrollControl) toggleScrolling();
 }
-
 
   document.addEventListener('DOMContentLoaded', async function () { 
     await hideAllBanners(); 
