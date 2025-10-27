@@ -1360,6 +1360,7 @@ ccpaBanner && !document.getElementById("consensite-banner-type").textContent.toL
         // Show main consent banner with force 
         const mainBanner = document.getElementById('main-consent-banner'); 
         if (mainBanner) { 
+         hideBanner(document.getElementById("initial-consent-banner")); 
           showBanner(mainBanner); 
  
           // Update CCPA preference form with saved preferences 
