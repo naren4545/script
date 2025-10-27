@@ -1050,9 +1050,10 @@ personalizationConsent === "false") {
   // } 
 async function disableScrollOnSite() {
   const scrollControl = document.querySelector('[scroll-control="true"]');
-  if (!scrollControl) return;
-
-  let bannerObservers = [];
+  if (!scrollControl) {
+    console.log("Scroll control element not found. Scroll lock disabled.");
+    return;
+  }
 
   function lockScroll() {
     const scrollY = window.scrollY;
@@ -1062,6 +1063,7 @@ async function disableScrollOnSite() {
     document.body.style.top = `-${scrollY}px`;
     document.body.style.width = '100%';
     document.body.dataset.scrollY = scrollY;
+    console.log("Scroll locked at position:", scrollY);
   }
 
   function unlockScroll() {
@@ -1072,44 +1074,34 @@ async function disableScrollOnSite() {
     document.body.style.top = '';
     document.body.style.width = '';
     window.scrollTo(0, scrollY);
+    console.log("Scroll unlocked. Restored to position:", scrollY);
   }
 
   function anyBannerVisible() {
-    const banners = document.querySelectorAll('[data-cookie-banner="true"]');
-    return Array.from(banners).some(
-      banner => window.getComputedStyle(banner).display !== 'none'
-    );
+    const banners = Array.from(document.querySelectorAll('[data-cookie-banner="true"]'));
+    const visibleBanners = banners.filter(banner => window.getComputedStyle(banner).display !== 'none');
+    console.log("Checking banners visibility. Total:", banners.length, "Visible:", visibleBanners.length);
+    return visibleBanners.length > 0;
   }
 
-  function cleanupBannerObservers() {
-    bannerObservers.forEach(obs => obs.disconnect());
-    bannerObservers = [];
-  }
-
-  function observeAllBanners(mutationHandler) {
-    cleanupBannerObservers();
-    const banners = document.querySelectorAll('[data-cookie-banner="true"]');
-    banners.forEach(banner => {
-      const obs = new MutationObserver(mutationHandler);
-      obs.observe(banner, { attributes: true, attributeFilter: ["style", "class"] });
-      bannerObservers.push(obs);
-    });
-  }
-
-  function mutationHandler() {
-    observeAllBanners(mutationHandler);
+  function updateScrollState(mutationsList) {
+    if (mutationsList) {
+      console.log("Mutations detected:", mutationsList.length);
+    }
     if (anyBannerVisible()) lockScroll();
     else unlockScroll();
   }
 
-  // Initial setup
-  mutationHandler();
+  const globalObserver = new MutationObserver(updateScrollState);
+  globalObserver.observe(document.body, {
+    childList: true,
+    subtree: true,
+    attributes: true,
+    attributeFilter: ['style', 'class', 'hidden'],
+  });
 
-  // Also observe parent for DOM additions/removals
-  const banners = document.querySelectorAll('[data-cookie-banner="true"]');
-  const parent = banners.length ? banners[0].parentNode : document.body;
-  const parentObserver = new MutationObserver(mutationHandler);
-  parentObserver.observe(parent, { childList: true, subtree: true });
+  console.log("disableScrollOnSite initialized");
+  updateScrollState();
 }
 
 
