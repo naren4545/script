@@ -1072,27 +1072,29 @@ personalizationConsent === "false") {
   }
 
  function toggleScrolling() {
-  const banners = document.querySelectorAll('[data-cookie-banner="true"]');
-  if (!banners.length) return;
+  let banners = document.querySelectorAll('[data-cookie-banner="true"]');
+  const parent = banners.length ? banners[0].parentNode : document.body;
 
-  // Helper to check if any banner is visible
   function anyBannerVisible() {
+    banners = document.querySelectorAll('[data-cookie-banner="true"]');
     return Array.from(banners).some(banner =>
       window.getComputedStyle(banner).display !== 'none'
     );
   }
 
-  const observer = new MutationObserver(() => {
-    const isVisible = anyBannerVisible();
-    if (isVisible) lockScroll();
+  function mutationHandler() {
+    banners = document.querySelectorAll('[data-cookie-banner="true"]');
+    const visible = anyBannerVisible();
+    if (banners.length && visible) lockScroll();
     else unlockScroll();
-  });
+  }
 
   // Initial check
-  const isVisible = anyBannerVisible();
-  if (isVisible) lockScroll();
-  else unlockScroll();
+  mutationHandler();
 
+  const observer = new MutationObserver(mutationHandler);
+  // Observe attributes and childList for dynamic changes
+  observer.observe(parent, { childList: true, subtree: true });
   banners.forEach(banner => {
     observer.observe(banner, { attributes: true, attributeFilter: ["style", "class"] });
   });
