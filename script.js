@@ -1048,37 +1048,56 @@ personalizationConsent === "false") {
   //     toggleScrolling(); 
   //   } 
   // } 
-async function disableScrollOnSite() {
-  const scrollControl = document.querySelector('[scroll-control="true"]');
+function toggleScrolling() {
+  let banners = document.querySelectorAll('[data-cookie-banner="true"]');
+  const parent = banners.length ? banners[0].parentNode : document.body;
+  let bannerObservers = [];
 
   function anyBannerVisible() {
-    const banners = document.querySelectorAll('[data-cookie-banner="true"]');
+    banners = document.querySelectorAll('[data-cookie-banner="true"]');
     return Array.from(banners).some(banner =>
-      window.getComputedStyle(banner).display !== "none"
+      window.getComputedStyle(banner).display !== 'none'
     );
   }
 
-  function updateScrollLock() {
-    document.body.style.overflow = anyBannerVisible() ? "hidden" : "";
+  function lockScroll() {
+    document.body.style.overflow = 'hidden';
+  }
+  function unlockScroll() {
+    document.body.style.overflow = '';
   }
 
-  function toggleScrolling() {
-    updateScrollLock();
+  function cleanupBannerObservers() {
+    // Disconnect previous banner observers
+    bannerObservers.forEach(obs => obs.disconnect());
+    bannerObservers = [];
+  }
 
-    // Observe the body (or a specific parent if you know it) for child and attribute changes
-    const observer = new MutationObserver(updateScrollLock);
-    observer.observe(document.body, {
-      childList: true,
-      subtree: true,
-      attributes: true,
-      attributeFilter: ["style", "class"]
+  function observeCurrentBanners() {
+    cleanupBannerObservers();
+    banners.forEach(banner => {
+      const obs = new MutationObserver(mutationHandler);
+      obs.observe(banner, { attributes: true, attributeFilter: ["style", "class"] });
+      bannerObservers.push(obs);
     });
   }
 
-  if (scrollControl) {
-    toggleScrolling();
+  function mutationHandler() {
+    banners = document.querySelectorAll('[data-cookie-banner="true"]');
+    observeCurrentBanners(); // re-attach observers as banners may have changed
+    const visible = anyBannerVisible();
+    if (banners.length && visible) lockScroll();
+    else unlockScroll();
   }
+
+  // Initial setup
+  mutationHandler();
+
+  // Main observer for banner additions/removals
+  const parentObserver = new MutationObserver(mutationHandler);
+  parentObserver.observe(parent, { childList: true, subtree: true });
 }
+
 
   document.addEventListener('DOMContentLoaded', async function () { 
     await hideAllBanners(); 
