@@ -1050,10 +1050,7 @@ personalizationConsent === "false") {
   // } 
 async function disableScrollOnSite() {
   const scrollControl = document.querySelector('[scroll-control="true"]');
-  if (!scrollControl) {
-    console.log("Scroll control element not found. Scroll lock disabled.");
-    return;
-  }
+  if (!scrollControl) return;
 
   function lockScroll() {
     const scrollY = window.scrollY;
@@ -1063,7 +1060,6 @@ async function disableScrollOnSite() {
     document.body.style.top = `-${scrollY}px`;
     document.body.style.width = '100%';
     document.body.dataset.scrollY = scrollY;
-    console.log("Scroll locked at position:", scrollY);
   }
 
   function unlockScroll() {
@@ -1074,34 +1070,34 @@ async function disableScrollOnSite() {
     document.body.style.top = '';
     document.body.style.width = '';
     window.scrollTo(0, scrollY);
-    console.log("Scroll unlocked. Restored to position:", scrollY);
   }
 
   function anyBannerVisible() {
-    const banners = Array.from(document.querySelectorAll('[data-cookie-banner="true"]'));
-    const visibleBanners = banners.filter(banner => window.getComputedStyle(banner).display !== 'none');
-    console.log("Checking banners visibility. Total:", banners.length, "Visible:", visibleBanners.length);
-    return visibleBanners.length > 0;
+    const banners = document.querySelectorAll('[data-cookie-banner="true"]');
+    return Array.from(banners).some(banner => 
+      window.getComputedStyle(banner).display !== 'none'
+    );
   }
 
-  function updateScrollState(mutationsList) {
-    if (mutationsList) {
-      console.log("Mutations detected:", mutationsList.length);
-    }
+  function toggleScrolling() {
+    const banners = document.querySelectorAll('[data-cookie-banner="true"]');
+    if (!banners.length) return;
+
+    const observer = new MutationObserver(() => {
+      if (anyBannerVisible()) lockScroll();
+      else unlockScroll();
+    });
+
+    // Initial check
     if (anyBannerVisible()) lockScroll();
     else unlockScroll();
+
+    banners.forEach(banner => {
+      observer.observe(banner, { attributes: true, attributeFilter: ['style', 'class'] });
+    });
   }
 
-  const globalObserver = new MutationObserver(updateScrollState);
-  globalObserver.observe(document.body, {
-    childList: true,
-    subtree: true,
-    attributes: true,
-    attributeFilter: ['style', 'class', 'hidden'],
-  });
-
-  console.log("disableScrollOnSite initialized");
-  updateScrollState();
+  toggleScrolling();
 }
 
 
