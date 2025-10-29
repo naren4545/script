@@ -869,7 +869,7 @@ checkboxName.toLowerCase().includes('functional')) {
       } 
       const siteDomain = window.location.hostname; 
       const apiUrl = 
-`https://cb-server.web-8fb.workers.dev/api/site/subscription-status?siteDomain=${encodeURIComponent(siteDomain)}`; 
+`https://framer-consentbit.web-8fb.workers.dev/subscription-status?siteDomain=${encodeURIComponent(siteDomain)}`; 
       const response = await fetch(apiUrl, { 
         method: "GET", 
         headers: { 
