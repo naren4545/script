@@ -878,12 +878,12 @@ checkboxName.toLowerCase().includes('functional')) {
         } 
       }); 
       if (!response.ok) { 
-        return true; 
+        return false; 
       } 
       const data = await response.json(); 
       return data.canPublishToCustomDomain === true; 
     } catch (error) { 
-      return true; 
+      return false; 
     } 
   } 
   function removeConsentElements() {    const selectors = [ 
