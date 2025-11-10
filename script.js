@@ -1254,11 +1254,7 @@ ccpaBanner && !document.getElementById("consensite-banner-type").textContent.toL
      
      // console.log("hiiiiii",canPublish)
       isStaging = isStagingHostname(); 
- if(isStaging || canPublish){
-    console.log("done 1")
-document.getElementById('toggle-consent-btn').style.display = "block";
-
- }
+ 
       if (!canPublish && !isStaging) { 
        
         removeConsentElements(); 
