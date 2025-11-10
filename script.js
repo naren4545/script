@@ -1251,7 +1251,7 @@ ccpaBanner && !document.getElementById("consensite-banner-type").textContent.toL
         } 
       } 
       canPublish = await checkPublishingStatus(); 
-     canPublish=true;
+     
      console.log("hiiiiii",canPublish)
       isStaging = isStagingHostname(); 
  
