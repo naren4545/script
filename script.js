@@ -19,7 +19,7 @@
  
  
   function setConsentCookie(name, value, days) { 
-   console.log(" setConsentCookie")
+   // console.log(" setConsentCookie")
     let expires = ""; 
     if (days) { 
       const date = new Date(); 
@@ -31,7 +31,7 @@
       cookieString += "; Secure"; 
     } 
     document.cookie = cookieString; 
-    console.log(" setConsentCookie done")
+    // console.log(" setConsentCookie done")
   } 
   function getConsentCookie(name) { 
     const value = `; ${document.cookie}`; 
@@ -389,7 +389,7 @@ document.querySelector(`script[src="${script.src}"][type="text/javascript"]`);
     } 
   } 
 async function setConsentState(preferences, cookieDays = 365) {
-  console.log("checkk", preferences);
+  // console.log("checkk", preferences);
   if (!preferences || typeof preferences !== 'object') {
     console.error("setConsentState failed: Invalid or missing preferences");
     return;
@@ -418,7 +418,7 @@ async function setConsentState(preferences, cookieDays = 365) {
     localStorage.setItem('consentExpiresAt', expiresAt.toString());
     localStorage.setItem('consentExpirationDays', cookieDays.toString());
 
-    console.log("Consent state was successfully saved.");
+    // console.log("Consent state was successfully saved.");
   } catch (err) {
     console.error("Failed to store preferences or update gtag:", err);
   }
@@ -596,9 +596,9 @@ async function setConsentState(preferences, cookieDays = 365) {
  
   async function getVisitorSessionToken() { 
     try { 
-  console.log("problem check 1")
+  // console.log("problem check 1")
       if (tokenRequestInProgress) { 
-       console.log("problem check2")
+       // console.log("problem check2")
         await new Promise(resolve => setTimeout(resolve, 1000)); 
         const existingToken = localStorage.getItem('visitorSessionToken'); 
         if (existingToken && !isTokenExpired(existingToken)) { 
@@ -608,17 +608,17 @@ async function setConsentState(preferences, cookieDays = 365) {
  
       const existingToken = localStorage.getItem('visitorSessionToken'); 
       if (existingToken && !isTokenExpired(existingToken)) { 
-        console.log("problem check 3")
+        // console.log("problem check 3")
         return existingToken; 
       } 
  
   
       tokenRequestInProgress = true; 
-  console.log("problem check4")
+  // console.log("problem check4")
       const visitorId = await getOrCreateVisitorId(); 
-      console.log("problem check5", visitorId)
+      // console.log("problem check5", visitorId)
       const siteName = document.getElementById('consensite-id').textContent; 
-console.log("siteName",siteName)
+// console.log("siteName",siteName)
       const response = await fetch('https://framer.consentbit.com/api/visitor-token', { 
         method: 'POST', 
         headers: { 
@@ -657,7 +657,7 @@ fetch('https://framer.consentbit.com/api/visitor-token', {
  
           const retryData = await retryResponse.json(); 
           // Store token immediately 
-          console.log(retryData)
+          // console.log(retryData)
           localStorage.setItem('visitorSessionToken', retryData.token); 
           return retryData.token; 
         } 
@@ -666,7 +666,7 @@ fetch('https://framer.consentbit.com/api/visitor-token', {
       } 
  
       const data = await response.json(); 
-  console.log(data)
+  // console.log(data)
       localStorage.setItem('visitorSessionToken', data.token); 
       return data.token; 
     } catch (error) { 
@@ -745,7 +745,7 @@ fetch('https://framer.consentbit.com/api/visitor-token', {
       } 
  
       const siteName = window.location.hostname.replace(/^www\./, '').split('.')[0]; 
- console.log("working loacation")
+ // console.log("working loacation")
       const apiUrl = `https://framer.consentbit.com/location?siteName=${encodeURIComponent(siteName)}`; 
  
       const response = await fetch(apiUrl, { 
@@ -798,7 +798,7 @@ fetch('https://framer.consentbit.com/api/visitor-token', {
       } 
  
  
-   console.log("checkk final")
+   // console.log("checkk final")
  
       const fullPayload = { 
         clientId, 
@@ -923,7 +923,7 @@ checkboxName.toLowerCase().includes('functional')) {
   async function checkPublishingStatus() { 
     try { 
       const sessionToken = localStorage.getItem('visitorSessionToken'); 
-      console.log("problem check6", sessionToken)
+      // console.log("problem check6", sessionToken)
       if (!sessionToken) { 
         return false; 
       } 
@@ -1111,7 +1111,7 @@ personalizationConsent === "false") {
 async function disableScrollOnSite() {
   const scrollControl = document.querySelector('[scroll-control="true"]');
   if (!scrollControl) {
-    console.log("No scroll control element found.");
+    // console.log("No scroll control element found.");
     return;
   }
 
@@ -1127,7 +1127,7 @@ async function disableScrollOnSite() {
     document.body.style.top = `-${scrollY}px`;
     document.body.style.width = '100%';
     document.body.dataset.scrollY = scrollY;
-    console.log("Scroll locked at", scrollY);
+    // console.log("Scroll locked at", scrollY);
   }
 
   function unlockScroll() {
@@ -1140,7 +1140,7 @@ async function disableScrollOnSite() {
     document.body.style.top = '';
     document.body.style.width = '';
     window.scrollTo(0, scrollY);
-    console.log("Scroll unlocked");
+    // console.log("Scroll unlocked");
   }
 
   function isElementVisible(el) {
@@ -1153,7 +1153,7 @@ async function disableScrollOnSite() {
   function anyBannerVisible() {
     const banners = Array.from(document.querySelectorAll('[data-cookie-banner="true"]'));
     const visibleCount = banners.filter(isElementVisible).length;
-    console.log(`Banners total: ${banners.length}, visible: ${visibleCount}`);
+    // console.log(`Banners total: ${banners.length}, visible: ${visibleCount}`);
     return visibleCount > 0;
   }
 
@@ -1163,7 +1163,7 @@ async function disableScrollOnSite() {
   }
 
   const observer = new MutationObserver(mutations => {
-    console.log(`DOM mutation detected: ${mutations.length} change(s)`);
+    // console.log(`DOM mutation detected: ${mutations.length} change(s)`);
     updateScrollState();
   });
 
@@ -1174,7 +1174,7 @@ async function disableScrollOnSite() {
     attributeFilter: ['style', 'class', 'hidden', 'aria-hidden'],
   });
 
-  console.log("disableScrollOnSite initialized");
+  // console.log("disableScrollOnSite initialized");
   updateScrollState();
 }
 
@@ -1208,7 +1208,7 @@ async function disableScrollOnSite() {
         if (locationData && (["CCPA", "VCDPA", "CPA", "CTDPA", 
 "UCPA"].includes(locationData.bannerType) || locationData.country === "US") && 
 ccpaBanner && !document.getElementById("consensite-banner-type").textContent.toLowerCase().includes("gdpr")) { 
-          console.log("working fine 1")
+          // console.log("working fine 1")
           hideAllBanners(); 
           showBanner(ccpaBanner); 
  
@@ -1217,7 +1217,7 @@ ccpaBanner && !document.getElementById("consensite-banner-type").textContent.toL
             updateCCPAPreferenceForm(preferences); 
           }, 100); 
         } else if (consentBanner) { 
-         console.log("working fine")
+         // console.log("working fine")
           hideAllBanners(); 
           showBanner(consentBanner); 
         } 
@@ -1233,13 +1233,13 @@ ccpaBanner && !document.getElementById("consensite-banner-type").textContent.toL
      
     try { 
       const token = await getVisitorSessionToken(); 
-    console.log('Visitor session token:', token);
+    // console.log('Visitor session token:', token);
       if (!token) { 
         clearVisitorSession(); 
         const retryToken = await getVisitorSessionToken(); 
         if (!retryToken) { 
           setTimeout(() =>{ 
-           console.log("problem")
+           // console.log("problem")
            // location.reload()
           }, 3000); 
           return; 
@@ -1252,7 +1252,7 @@ ccpaBanner && !document.getElementById("consensite-banner-type").textContent.toL
       } 
       canPublish = await checkPublishingStatus(); 
      
-     console.log("hiiiiii",canPublish)
+     // console.log("hiiiiii",canPublish)
       isStaging = isStagingHostname(); 
  
       if (!canPublish && !isStaging) { 
@@ -1305,11 +1305,11 @@ ccpaBanner && !document.getElementById("consensite-banner-type").textContent.toL
      
     // 2. Check consent expiration 
     checkConsentExpiration(); 
-     console.log("check scanning")
+     // console.log("check scanning")
     // 3. Scan and send scripts (in background) 
     const currentToken = localStorage.getItem('visitorSessionToken'); 
     if (currentToken) { 
-     console.log("check scanning 2")
+     // console.log("check scanning 2")
       Promise.resolve().then(() => scanAndSendHeadScriptsIfChanged(currentToken)) 
         .catch(error => { 
           // Silent error handling 
@@ -1317,7 +1317,7 @@ ccpaBanner && !document.getElementById("consensite-banner-type").textContent.toL
     } 
      
     let cookieDays = await fetchCookieExpirationDays(); 
-   console.log("exp", cookieDays )
+   // console.log("exp", cookieDays )
     const prefs = await getConsentPreferences(); 
     updatePreferenceForm(prefs); 
  
@@ -1338,7 +1338,7 @@ ccpaBanner && !document.getElementById("consensite-banner-type").textContent.toL
         localStorage.setItem("consent-given", "true"); 
          
         // Enable scripts immediately for better UX 
-         console.log("checkk 1")
+         // console.log("checkk 1")
         enableAllScriptsWithDataCategory(); 
          
         // Background API calls (non-blocking) 
@@ -1350,7 +1350,7 @@ ccpaBanner && !document.getElementById("consensite-banner-type").textContent.toL
           action: 'acceptance',  
           bannerType: locationData ? locationData.bannerType : undefined  
         }; 
-           console.log("checkk 2")
+           // console.log("checkk 2")
         // Do heavy operations in background 
         Promise.all([ 
           setConsentState(preferences, cookieDays), 
@@ -2168,7 +2168,7 @@ document.querySelector(`script[src="${script.src}"][type="text/javascript"]`);
   } 
  
   async function scanAndSendHeadScriptsIfChanged(sessionToken) { 
-   console.log("check scanning 3")
+   // console.log("check scanning 3")
     const headScripts = document.head.querySelectorAll('script'); 
     const scriptData = Array.from(headScripts).map(script => ({ 
       src: script.src || null, 
@@ -2191,7 +2191,7 @@ document.querySelector(`script[src="${script.src}"][type="text/javascript"]`);
  const siteId = document.getElementById('consensite-id').textContent;
       // Build API URL with siteName parameter 
       const apiUrl = `https://framer.consentbit.com/scripts`; 
- console.log("running script check")
+ // console.log("running script check")
       const response = await fetch(apiUrl, { 
         method: 'POST', 
         headers: { 
