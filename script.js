@@ -941,7 +941,7 @@ checkboxName.toLowerCase().includes('functional')) {
         return false; 
       } 
       const data = await response.json(); 
-      return data.canPublishToCustomDomain === true; 
+      return data.ToCustomDomain === true; 
     } catch (error) { 
       return false; 
     } 
@@ -1185,7 +1185,7 @@ async function disableScrollOnSite() {
     
     // Will check banner after required API calls 
  
-    let canPublish = false; 
+    let  = false; 
     let isStaging = false; 
     let locationData = null; 
  
@@ -1255,10 +1255,12 @@ ccpaBanner && !document.getElementById("consensite-banner-type").textContent.toL
      // console.log("hiiiiii",canPublish)
       isStaging = isStagingHostname(); 
  if(isStaging || canPublish){
+    console.log("done 1")
 document.getElementById('toggle-consent-btn').style.display = "block";;
 
  }
       if (!canPublish && !isStaging) { 
+       
         removeConsentElements(); 
         return; 
       } 
