@@ -1253,26 +1253,32 @@ ccpaBanner && !document.getElementById("consensite-banner-type").textContent.toL
       canPublish = await checkPublishingStatus(); 
 
       
-     if(canPublish){
-const el = document.getElementById('toggle-consent-btn');
-if (el) el.style.display = "block";
-
-     }
+   
 
 
       
      // console.log("hiiiiii",canPublish)
       isStaging = isStagingHostname(); 
       
+
+      
+      if (!canPublish && !isStaging) { 
+       
+        removeConsentElements(); 
+
  if(isStaging){
 const el = document.getElementById('toggle-consent-btn');
 if (el) el.style.display = "block";
 
      }
-      
-      if (!canPublish && !isStaging) { 
-       
-        removeConsentElements(); 
+          if(canPublish){
+const el = document.getElementById('toggle-consent-btn');
+if (el) el.style.display = "block";
+
+     }
+
+
+        
         return; 
       } 
     } catch (error) { 
