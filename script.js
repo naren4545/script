@@ -941,7 +941,7 @@ checkboxName.toLowerCase().includes('functional')) {
         return false; 
       } 
       const data = await response.json(); 
-      return data.ToCustomDomain === true; 
+      return data.canPublishToCustomDomain === true; 
     } catch (error) { 
       return false; 
     } 
