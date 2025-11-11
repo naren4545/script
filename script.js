@@ -1259,8 +1259,8 @@ ccpaBanner && !document.getElementById("consensite-banner-type").textContent.toL
       
      // console.log("hiiiiii",canPublish)
       isStaging = isStagingHostname(); 
-      console.log("staging:",isStaging)
-       console.log("publish:",canPublish)
+      // console.log("staging:",isStaging)
+      //  console.log("publish:",canPublish)
  if(isStaging){
 const el = document.getElementById('toggle-consent-btn');
 if (el) el.style.display = "block";
