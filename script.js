@@ -1259,13 +1259,8 @@ ccpaBanner && !document.getElementById("consensite-banner-type").textContent.toL
       
      // console.log("hiiiiii",canPublish)
       isStaging = isStagingHostname(); 
-      
-
-      
-      if (!canPublish && !isStaging) { 
-       
-        removeConsentElements(); 
-
+      console.log("staging:",isStaging)
+       console.log("publish:",canPublish)
  if(isStaging){
 const el = document.getElementById('toggle-consent-btn');
 if (el) el.style.display = "block";
@@ -1276,6 +1271,12 @@ const el = document.getElementById('toggle-consent-btn');
 if (el) el.style.display = "block";
 
      }
+      
+      if (!canPublish && !isStaging) { 
+       
+        removeConsentElements(); 
+
+
 
 
         
