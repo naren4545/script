@@ -1032,7 +1032,7 @@ div#banner-code {
   .consentbit-change-preference {
     z-index: 999;
     cursor: pointer;
-    background-image: url("https://cdn.prod.website-files.com/63d5330e6841081487be0bd6/67ebf5ee639d12979361f2bc_consent.png");
+    background-image: url("https://script-5qu.pages.dev/67ebf5ee639d12979361f2bc_consent.webp");
     background-position: 50%;
     background-size: cover;
     border-radius: 50%;
