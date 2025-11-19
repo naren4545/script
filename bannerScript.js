@@ -1733,5 +1733,7 @@ window.addEventListener("load", () => {
   } else {
     console.error("cookiePreviewHTML missing");
   }
+
+	 document.dispatchEvent(new Event("cookieBannerReady"));
 });
 
