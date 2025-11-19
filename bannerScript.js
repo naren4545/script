@@ -1717,12 +1717,13 @@ ${
 <div>
 `;
 // Add CSS when browser is idle (non-blocking)
-requestIdleCallback(() => {
+window.addEventListener("load", () => {
+  // Add CSS
   const styleTag = document.createElement("style");
   styleTag.innerHTML = cookiePreviewCSS;
   document.head.appendChild(styleTag);
-});
 
-document.addEventListener("DOMContentLoaded", () => {
+  // Add HTML
   document.body.insertAdjacentHTML("beforeend", cookiePreviewHTML);
 });
+
