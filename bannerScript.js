@@ -1717,23 +1717,19 @@ ${
 <div>
 `;
 // Add CSS when browser is idle (non-blocking)
-window.addEventListener("load", () => {
-
-	 console.log("start");
-  if (typeof cookiePreviewCSS !== "undefined") {
-    const styleTag = document.createElement("style");
-    styleTag.innerHTML = cookiePreviewCSS;
-    document.head.appendChild(styleTag);
-  } else {
-    console.error("cookiePreviewCSS missing");
-  }
-
-  if (typeof cookiePreviewHTML !== "undefined") {
-    document.body.insertAdjacentHTML("beforeend", cookiePreviewHTML);
-  } else {
-    console.error("cookiePreviewHTML missing");
-  }
-
-window.dispatchEvent(new Event("cookieBannerReady"));
+// 1. Insert CSS as early as possible (non-blocking)
+document.addEventListener("DOMContentLoaded", () => {
+  const styleTag = document.createElement("style");
+  styleTag.innerHTML = cookiePreviewCSS;
+  document.head.appendChild(styleTag);
 });
+
+// 2. Insert HTML AS SOON as DOM is ready — NOT on window.load
+document.addEventListener("DOMContentLoaded", () => {
+  document.body.insertAdjacentHTML("beforeend", cookiePreviewHTML);
+
+  // 3. Dispatch event RIGHT after HTML exists
+  document.dispatchEvent(new Event("cookieBannerReady"));
+});
+
 
