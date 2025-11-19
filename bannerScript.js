@@ -1718,12 +1718,20 @@ ${
 `;
 // Add CSS when browser is idle (non-blocking)
 window.addEventListener("load", () => {
-  // Add CSS
-  const styleTag = document.createElement("style");
-  styleTag.innerHTML = cookiePreviewCSS;
-  document.head.appendChild(styleTag);
 
-  // Add HTML
-  document.body.insertAdjacentHTML("beforeend", cookiePreviewHTML);
+	 console.log("start");
+  if (typeof cookiePreviewCSS !== "undefined") {
+    const styleTag = document.createElement("style");
+    styleTag.innerHTML = cookiePreviewCSS;
+    document.head.appendChild(styleTag);
+  } else {
+    console.error("cookiePreviewCSS missing");
+  }
+
+  if (typeof cookiePreviewHTML !== "undefined") {
+    document.body.insertAdjacentHTML("beforeend", cookiePreviewHTML);
+  } else {
+    console.error("cookiePreviewHTML missing");
+  }
 });
 
