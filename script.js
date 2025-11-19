@@ -1,5 +1,5 @@
 document.addEventListener("cookieBannerReady",function () { 
-
+console.log("working")
   window.dataLayer = window.dataLayer || []; 
   function gtag() { dataLayer.push(arguments); } 
  
