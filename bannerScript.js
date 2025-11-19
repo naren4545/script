@@ -640,13 +640,13 @@ const prefrenceHtml = `${
            }`;
 
 
-  const cookiePreviewCSS = `
+  const cookiePreviewHTML = `
 
 
 
+<div id="banner-code">
 
-
-
+<style>
 div#banner-code {
  font-family: ${custom.font};
 }
@@ -1368,9 +1368,8 @@ div#banner-code {
   	transform: none;
     }
   }
-`
+</style>
 
-const cookiePreviewHTML=`<div id="banner-code">
 <span style="font-family:${custom.font}; position:absolute; opacity:0; left:-9999px;">font-preload</span>
 <div
 id="consent-banner"
@@ -1716,10 +1715,6 @@ ${
 
 <div>
 `;
-// Add CSS when browser is idle (non-blocking)
-// 1. Insert CSS as early as possible (non-blocking)
 document.addEventListener("DOMContentLoaded", () => {
-  document.body.insertAdjacentHTML('beforeend',`${cookiePreviewCSS+ cookiePreviewHTML}`);
-	
-}); 
-
+  document.body.insertAdjacentHTML('beforeend', cookiePreviewHTML);
+});
