@@ -1716,9 +1716,12 @@ ${
 
 <div>
 `;
-const styleTag = document.createElement("style");
-styleTag.innerHTML = cookiePreviewCSS;
-document.head.appendChild(styleTag);
+// Add CSS when browser is idle (non-blocking)
+requestIdleCallback(() => {
+  const styleTag = document.createElement("style");
+  styleTag.innerHTML = cookiePreviewCSS;
+  document.head.appendChild(styleTag);
+});
 
 document.addEventListener("DOMContentLoaded", () => {
   document.body.insertAdjacentHTML("beforeend", cookiePreviewHTML);
