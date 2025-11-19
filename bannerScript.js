@@ -640,13 +640,13 @@ const prefrenceHtml = `${
            }`;
 
 
-  const cookiePreviewHTML = `
+  const cookiePreviewCSS = `
 
 
 
-<div id="banner-code">
 
-<style>
+
+
 div#banner-code {
  font-family: ${custom.font};
 }
@@ -1368,8 +1368,9 @@ div#banner-code {
   	transform: none;
     }
   }
-</style>
+`
 
+const cookiePreviewHTML=`<div id="banner-code">
 <span style="font-family:${custom.font}; position:absolute; opacity:0; left:-9999px;">font-preload</span>
 <div
 id="consent-banner"
@@ -1716,5 +1717,11 @@ ${
 <div>
 `;
 document.addEventListener("DOMContentLoaded", () => {
-  document.body.insertAdjacentHTML('beforeend', cookiePreviewHTML);
+  // 1. Insert CSS into head
+  const styleTag = document.createElement("style");
+  styleTag.innerHTML = cookiePreviewCSS;
+  document.head.appendChild(styleTag);
+
+  // 2. Insert HTML into body
+  document.body.insertAdjacentHTML("beforeend", cookiePreviewHTML);
 });
