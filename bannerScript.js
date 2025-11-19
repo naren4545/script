@@ -1716,12 +1716,10 @@ ${
 
 <div>
 `;
-document.addEventListener("DOMContentLoaded", () => {
-  // 1. Insert CSS into head
-  const styleTag = document.createElement("style");
-  styleTag.innerHTML = cookiePreviewCSS;
-  document.head.appendChild(styleTag);
+const styleTag = document.createElement("style");
+styleTag.innerHTML = cookiePreviewCSS;
+document.head.appendChild(styleTag);
 
-  // 2. Insert HTML into body
+document.addEventListener("DOMContentLoaded", () => {
   document.body.insertAdjacentHTML("beforeend", cookiePreviewHTML);
 });
