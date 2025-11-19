@@ -1,4 +1,4 @@
-document.addEventListener("cookieBannerReady",function () { 
+(function () { 
 console.log("working")
   window.dataLayer = window.dataLayer || []; 
   function gtag() { dataLayer.push(arguments); } 
@@ -2679,5 +2679,5 @@ document.querySelector(`script[src="${script.src}"][type="text/javascript"]`);
 //     } 
 //   }); 
  
-}  );
- 
+}  
+ )();
