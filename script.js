@@ -968,17 +968,17 @@ hostname.includes('127.0.0.1');
   // --- Load Consent Styles --- 
   function loadConsentStyles() { 
     try { 
-      const link = document.createElement("link"); 
-      link.rel = "stylesheet"; 
-      link.href = "https://cdn.jsdelivr.net/gh/snm62/consentbit@0980c49/consentbitstyle.css"; 
-      link.type = "text/css"; 
-      const link2 = document.createElement("link"); 
-      link2.rel = "stylesheet"; 
-      link2.href = "https://cdn.jsdelivr.net/gh/snm62/consentbit@8c69a0b/consentbit.css"; 
-      document.head.appendChild(link2); 
-      link.onerror = function () {}; 
-      link.onload = function () {}; 
-      document.head.appendChild(link); 
+      // const link = document.createElement("link"); 
+      // link.rel = "stylesheet"; 
+      // link.href = "https://cdn.jsdelivr.net/gh/snm62/consentbit@0980c49/consentbitstyle.css"; 
+      // link.type = "text/css"; 
+      // const link2 = document.createElement("link"); 
+      // link2.rel = "stylesheet"; 
+      // link2.href = "https://cdn.jsdelivr.net/gh/snm62/consentbit@8c69a0b/consentbit.css"; 
+      // document.head.appendChild(link2); 
+      // link.onerror = function () {}; 
+      // link.onload = function () {}; 
+      // document.head.appendChild(link); 
     } catch (error) { 
       // Silent error handling 
     } 
