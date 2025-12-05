@@ -931,7 +931,7 @@ checkboxName.toLowerCase().includes('functional')) {
       const consensiteDiv = document.getElementById('consensite-id');
 const siteIdImp = consensiteDiv ? consensiteDiv.textContent.trim() : null;
       const apiUrl = 
-`https://framer-consentbit-test.web-8fb.workers.dev/subscription-status?siteId=${encodeURIComponent(siteIdImp)}`; 
+`https://framer-consentbit-test.web-8fb.workers.dev/subscription-status?siteId=${encodeURIComponent(siteIdImp)}&customDomain=${encodeURIComponent(siteDomain)}`; 
       const response = await fetch(apiUrl, { 
         method: "GET", 
         headers: { 
