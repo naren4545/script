@@ -928,8 +928,10 @@ checkboxName.toLowerCase().includes('functional')) {
         return false; 
       } 
       const siteDomain = window.location.hostname; 
+      const consensiteDiv = document.getElementById('consensite-id');
+const siteIdImp = consensiteDiv ? consensiteDiv.textContent.trim() : null;
       const apiUrl = 
-`https://framer.consentbit.com/subscription-status?siteDomain=${encodeURIComponent(siteDomain)}`; 
+`https://framer-consentbit-test.web-8fb.workers.dev/subscription-status?siteId=${encodeURIComponent(siteIdImp)}`; 
       const response = await fetch(apiUrl, { 
         method: "GET", 
         headers: { 
