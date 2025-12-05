@@ -1274,7 +1274,7 @@ if (el) el.style.display = "block";
 
      }
       
-      if (!canPublish && !isStaging) { 
+      if (!canPublish ) { 
        
         removeConsentElements(); 
 
