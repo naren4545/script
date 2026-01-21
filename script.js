@@ -1895,7 +1895,7 @@ document.querySelector('[data-consent-id="personalization-checkbox"]');
 
       // Hide all other banners first
       hideAllBanners();
-
+console.log(locationData)
       // Check if locationData indicates any US privacy law banner or US country
       if (
         locationData &&
