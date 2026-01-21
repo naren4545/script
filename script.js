@@ -1855,33 +1855,85 @@ document.querySelector('[data-consent-id="personalization-checkbox"]');
     } 
  
     // Universal "Do Not Share" link with consentbit-data-donotshare="consentbit-link-donotshare" attribute 
-    function setupDoNotShareLinks() { 
-      const doNotShareLinks = 
-document.querySelectorAll('[consentbit-data-donotshare="consentbit-link-donotshare"]'); 
-      doNotShareLinks.forEach(function (link) { 
-        link.onclick = async function (e) { 
-          e.preventDefault(); 
+//     function setupDoNotShareLinks() { 
+//       const doNotShareLinks = 
+// document.querySelectorAll('[consentbit-data-donotshare="consentbit-link-donotshare"]'); 
+//       doNotShareLinks.forEach(function (link) { 
+//         link.onclick = async function (e) { 
+//           e.preventDefault(); 
  
-          // Hide all other banners first 
-          hideAllBanners(); 
+//           // Hide all other banners first 
+//           hideAllBanners(); 
  
-          // Check if locationData indicates any US privacy law banner or US country 
-          if (locationData && (locationData?.bannerType === "CCPA" || 
-locationData?.bannerType === "VCDPA" || locationData?.bannerType === "CPA" || 
-locationData?.bannerType === "CTDPA" || locationData?.bannerType === "UCPA" || 
-locationData?.country === "US")) { 
-            // Show the CCPA banner with ID "main-consent-banner" 
-            const ccpaBanner = document.getElementById("main-consent-banner"); 
-            if (ccpaBanner && !document.getElementById("consensite-banner-type").textContent.toLowerCase().includes("gdpr")) { 
-              showBanner(ccpaBanner); 
-              const preferences = await getConsentPreferences(); 
-              updateCCPAPreferenceForm(preferences); 
-            } 
-          } 
-        }; 
-      }); 
-    } 
- 
+//           // Check if locationData indicates any US privacy law banner or US country 
+//           if (locationData && (locationData?.bannerType === "CCPA" || 
+// locationData?.bannerType === "VCDPA" || locationData?.bannerType === "CPA" || 
+// locationData?.bannerType === "CTDPA" || locationData?.bannerType === "UCPA" || 
+// locationData?.country === "US")) { 
+//             // Show the CCPA banner with ID "main-consent-banner" 
+//             const ccpaBanner = document.getElementById("main-consent-banner"); 
+//             if (ccpaBanner && !document.getElementById("consensite-banner-type").textContent.toLowerCase().includes("gdpr")) { 
+//               showBanner(ccpaBanner); 
+//               const preferences = await getConsentPreferences(); 
+//               updateCCPAPreferenceForm(preferences); 
+//             } 
+//           } 
+//         }; 
+//       }); 
+//     } 
+ function setupDoNotShareLinks() {
+  document.addEventListener("click", async function (e) {
+    const link = e.target.closest("a");
+    if (!link) return;
+
+    const href = link.getAttribute("href");
+    if (!href) return;
+
+    // ✅ Match your specific link
+    if (href === "https://consentbit-link-donotshare/") {
+      e.preventDefault();
+
+      // Hide all other banners first
+      hideAllBanners();
+
+      // Check if locationData indicates any US privacy law banner or US country
+      if (
+        locationData &&
+        (
+          locationData.bannerType === "CCPA" ||
+          locationData.bannerType === "VCDPA" ||
+          locationData.bannerType === "CPA" ||
+          locationData.bannerType === "CTDPA" ||
+          locationData.bannerType === "UCPA" ||
+          locationData.country === "US"
+        )
+      ) {
+        // Show the CCPA banner
+        const ccpaBanner = document.getElementById("main-consent-banner");
+
+        if (
+          ccpaBanner &&
+          !document
+            .getElementById("consensite-banner-type")
+            .textContent
+            .toLowerCase()
+            .includes("gdpr")
+        ) {
+          showBanner(ccpaBanner);
+          const preferences = await getConsentPreferences();
+          updateCCPAPreferenceForm(preferences);
+        }
+      } else {
+        // Show the GDPR banner
+        const gdprBanner = document.getElementById("consent-banner");
+        if (gdprBanner) {
+          showBanner(gdprBanner);
+        }
+      }
+    }
+  });
+}
+
     // Set up close buttons and do not share links when DOM is ready 
     setupConsentbitCloseButtons(); 
     setupDoNotShareLinks(); 
