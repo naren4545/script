@@ -1889,14 +1889,25 @@ document.querySelector('[data-consent-id="personalization-checkbox"]');
     const href = link.getAttribute("href");
     if (!href) return;
 
-    // ✅ Match your specific link
+    // Match your Do Not Share link
     if (href === "https://consentbit-link-donotshare") {
       e.preventDefault();
 
       // Hide all other banners first
       hideAllBanners();
-console.log(locationData)
-      // Check if locationData indicates any US privacy law banner or US country
+
+      // ✅ Ensure locationData exists
+      if (!locationData) {
+        try {
+          locationData = await detectLocationAndGetBannerType();
+        } catch (err) {
+          console.error("Failed to detect location:", err);
+        }
+      }
+
+      console.log(locationData);
+
+      // Check if US privacy law applies
       if (
         locationData &&
         (
@@ -1915,8 +1926,8 @@ console.log(locationData)
           ccpaBanner &&
           !document
             .getElementById("consensite-banner-type")
-            .textContent
-            .toLowerCase()
+            ?.textContent
+            ?.toLowerCase()
             .includes("gdpr")
         ) {
           showBanner(ccpaBanner);
@@ -1933,6 +1944,7 @@ console.log(locationData)
     }
   });
 }
+
 
     // Set up close buttons and do not share links when DOM is ready 
     setupConsentbitCloseButtons(); 
