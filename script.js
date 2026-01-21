@@ -1890,7 +1890,7 @@ document.querySelector('[data-consent-id="personalization-checkbox"]');
     if (!href) return;
 
     // ✅ Match your specific link
-    if (href === "https://consentbit-link-donotshare/") {
+    if (href === "https://consentbit-link-donotshare") {
       e.preventDefault();
 
       // Hide all other banners first
