@@ -1920,7 +1920,7 @@ document.querySelector('[data-consent-id="personalization-checkbox"]');
         )
       ) {
         // Show the CCPA banner
-        const ccpaBanner = document.getElementById("main-consent-banner");
+        const ccpaBanner = document.getElementById("initial-consent-banner");
 
         if (
           ccpaBanner &&
