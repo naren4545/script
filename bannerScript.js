@@ -532,7 +532,8 @@ const fontWeight = fontWeightMap[custom.weight] || 400;
     checkedCategories.find((item) => item.name === "Preferences")?.checked ||
     false;
 
- 
+ const hideLogo = settings?.hideLogo ?? false;
+
   const isCenter = custom.bannerAlignment === "center";
 
   const animationMap = {
@@ -1709,9 +1710,9 @@ ${
 <div id="consensite-banner-type" style="display:none">${
     compliance.length === 1 && compliance.includes("gdpr") ? "gdpr" : "ccpa"
   }</div>
-<div id="toggle-consent-btn"   scroll-control="true" class="consentbit-change-preference " style="
+${!(settings?.hideLogo ?? false) ?`<div id="toggle-consent-btn"   scroll-control="true" class="consentbit-change-preference " style="
     display: none;
-"></div>
+"></div>`: ` `}
 
 <div>
 `;
