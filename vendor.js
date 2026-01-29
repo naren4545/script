@@ -1,4 +1,4 @@
-<script>
+
 (async function () {
   console.log("yess")
   const GVL_URL = "https://ancient-wind-15ae.narendra-3c5.workers.dev/gvl";
@@ -199,4 +199,4 @@
   setTimeout(runDetection, 10000);
 
 })();
-</script>
+
