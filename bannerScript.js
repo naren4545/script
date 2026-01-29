@@ -98,7 +98,7 @@ const translations = {
     reject: "Reject",
     preferences: "Preference",
     ccpa: {
-      heading: "We value your Privacy",
+      heading: "We value your privacy",
       description:
         "We use cookies to provide you with the best possible experience. They also allow us to analyze user behavior in order to constantly improve the website for you.",
       doNotShare: "Do Not Share My Personal Information",
