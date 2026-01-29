@@ -1,5 +1,6 @@
 <script>
 (async function () {
+  console.log("yess")
   const GVL_URL = "https://ancient-wind-15ae.narendra-3c5.workers.dev/gvl";
 
   /* COMPLETE SCRIPT VENDOR MAPPING - All 5 test scripts covered */
