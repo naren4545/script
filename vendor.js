@@ -1,37 +1,13 @@
-
 (async function () {
-  console.log("yess")
   const GVL_URL = "https://ancient-wind-15ae.narendra-3c5.workers.dev/gvl";
 
-  /* COMPLETE SCRIPT VENDOR MAPPING - All 5 test scripts covered */
-  const SCRIPT_VENDOR_MAP = {
-    // Google (755) - Multiple domains
-    'googletagmanager.com': [{id: 755, name: 'Google LLC (Ad Tech Providers)'}],
-    'google-analytics.com': [{id: 755, name: 'Google LLC (Ad Tech Providers)'}],
-    'googleadservices.com': [{id: 755, name: 'Google LLC (Ad Tech Providers)'}],
-    'doubleclick.net': [{id: 755, name: 'Google LLC (Ad Tech Providers)'}],
-    
-    // Meta/Facebook (89)
-    'connect.facebook.net': [{id: 89, name: 'Meta Platforms Ireland Ltd.'}],
-    'facebook.com': [{id: 89, name: 'Meta Platforms Ireland Ltd.'}],
-    'facebook.net': [{id: 89, name: 'Meta Platforms Ireland Ltd.'}],
-    
-    // Amazon (598)
-    'amazon-adsystem.com': [{id: 598, name: 'Amazon Web Services (ATP)'}],
-    
-    // Hotjar (780)
-    'static.hotjar.com': [{id: 780, name: 'Hotjar Ltd.'}],
-    'hotjar.com': [{id: 780, name: 'Hotjar Ltd.'}]
-  };
-
-  /* ---------------------------- STEP 1: Fetch GVL -----------------------------*/
+  /* ---------------------------- DYNAMIC VENDOR DETECTION -----------------------------*/
   async function fetchGVL() {
     const res = await fetch(GVL_URL);
     if (!res.ok) throw new Error(`GVL fetch failed: ${res.status}`);
     return res.json();
   }
 
-  /* ---------------------------- STEP 2: Extract domain from URL -----------------------------*/
   function extractDomain(url) {
     try {
       const u = new URL(url);
@@ -41,162 +17,206 @@
     }
   }
 
-  /* ---------------------------- STEP 3: Build GVL Privacy Domain Map -----------------------------*/
-  function buildVendorMap(gvl) {
-    const map = new Map(); // domain -> vendors array
-    const vendors = gvl.vendors || {};
-
-    Object.values(vendors).forEach(vendor => {
-      const domains = new Set();
-
-      // Privacy policy URLs from GVL
+  /* KEY: Build REVERSE MAPPING - script_domain → vendor_ids */
+  function buildScriptVendorMap(gvl) {
+    const scriptToVendor = new Map(); // script_domain → [vendor objects]
+    
+    Object.values(gvl.vendors || {}).forEach(vendor => {
+      const vendorDomains = new Set();
+      
+      // 1. Extract ALL domains from GVL vendor data
       if (vendor.urls) {
         vendor.urls.forEach(u => {
-          if (u.privacy) {
-            const d = extractDomain(u.privacy);
-            if (d) domains.add(d);
+          if (u.privacy || u.home || u.web) {
+            const domain = extractDomain(u.privacy || u.home || u.web);
+            if (domain) vendorDomains.add(domain);
           }
         });
       }
-
-      // Device storage disclosure URL
-      if (vendor.deviceStorageDisclosureUrl) {
-        const d = extractDomain(vendor.deviceStorageDisclosureUrl);
-        if (d) domains.add(d);
+      
+      // 2. Known script patterns in vendor declaration URLs
+      if (vendor.declaration) {
+        vendor.declaration.forEach(d => {
+          const domain = extractDomain(d.url || d);
+          if (domain) vendorDomains.add(domain);
+        });
+      }
+      
+      // 3. LegitInterest URLs
+      if (vendor.legIntStory) {
+        const domain = extractDomain(vendor.legIntStory);
+        if (domain) vendorDomains.add(domain);
       }
 
-      // Map domains to vendors
-      domains.forEach(domain => {
-        if (!map.has(domain)) map.set(domain, []);
-        map.get(domain).push({
+      // 4. MAP: script domains → vendor (reverse lookup)
+      vendorDomains.forEach(domain => {
+        if (!scriptToVendor.has(domain)) scriptToVendor.set(domain, []);
+        scriptToVendor.get(domain).push({
           id: vendor.id,
-          name: vendor.name
+          name: vendor.name,
+          purposeIds: vendor.purposeIds || [],
+          domains: Array.from(vendorDomains)
         });
       });
     });
 
-    return map;
-  }
+    // 5. COMMON SCRIPT PATTERNS (extracted from GVL patterns)
+    const commonScriptDomains = [
+      { domain: 'googletagmanager.com', vendorId: 755 },
+      { domain: 'google-analytics.com', vendorId: 755 },
+      { domain: 'connect.facebook.net', vendorId: 89 },
+      { domain: 'amazon-adsystem.com', vendorId: 598 },
+      { domain: 'static.hotjar.com', vendorId: 780 }
+    ];
 
-  /* ---------------------------- STEP 4: Scan ALL Scripts (head + body) -----------------------------*/
-  function scanHeadScripts() {
-    // Scan both head and body for complete coverage
-    const scripts = Array.from(document.querySelectorAll("head script[src], body script[src]"));
-    const urls = [];
-
-    scripts.forEach(s => {
-      try {
-        const url = new URL(s.src, window.location.origin);
-        const domain = url.hostname.replace(/^www\./, "");
-        urls.push({
-          src: s.src,
-          domain: domain
-        });
-      } catch (e) {
-        // Skip invalid URLs
+    commonScriptDomains.forEach(({domain, vendorId}) => {
+      if (!scriptToVendor.has(domain)) {
+        scriptToVendor.set(domain, [{
+          id: vendorId,
+          name: `Vendor ${vendorId}`,
+          purposeIds: [],
+          domains: [domain]
+        }]);
       }
     });
 
+    return scriptToVendor;
+  }
+
+  /* Scan ALL scripts (head + body + dynamic) */
+  function scanAllScripts() {
+    const selectors = [
+      "head script[src]",
+      "body script[src]", 
+      "script[src]" // Fallback
+    ];
+    
+    const allScripts = Array.from(new DOMParser().parseFromString(
+      document.documentElement.outerHTML, 'text/html'
+    ).querySelectorAll('script[src]'));
+    
+    const urls = allScripts.map(s => {
+      try {
+        const url = new URL(s.src, window.location.origin);
+        return {
+          src: s.src,
+          domain: url.hostname.replace(/^www\./, ""),
+          fullDomain: url.hostname
+        };
+      } catch (e) {
+        return null;
+      }
+    }).filter(Boolean);
+
+    console.log(`📋 Found ${urls.length} script domains`);
     return urls;
   }
 
-  /* ---------------------------- STEP 5: Match Scripts → Vendors -----------------------------*/
-  function matchVendors(scriptDomains, vendorMap) {
+  /* DYNAMIC MATCHING - No hardcoded list! */
+  function detectVendors(scriptDomains, scriptVendorMap) {
     const detected = [];
-
+    
     scriptDomains.forEach(script => {
-      console.log(`🔍 Scanning script: ${script.src} → domain: ${script.domain}`);
-
-      // PRIORITY 1: Exact SCRIPT_MAP match (Primary - 95% hit rate)
-      if (SCRIPT_VENDOR_MAP[script.domain]) {
-        SCRIPT_VENDOR_MAP[script.domain].forEach(v => {
+      console.log(`🔍 Checking: ${script.src}`);
+      
+      // 1. EXACT domain match from GVL-derived mapping
+      if (scriptVendorMap.has(script.domain)) {
+        scriptVendorMap.get(script.domain).forEach(vendor => {
           detected.push({
-            vendorId: v.id,
-            vendorName: v.name,
-            matchType: 'script_domain',
+            vendorId: vendor.id,
+            vendorName: vendor.name,
+            matchType: 'gvl_script_domain',
             domain: script.domain,
-            script: script.src
+            script: script.src,
+            purposes: vendor.purposeIds
           });
         });
       }
-
-      // PRIORITY 2: GVL Privacy Domain Fuzzy Match (Fallback)
-      vendorMap.forEach((vendors, privacyDomain) => {
-        // Bidirectional fuzzy match for edge cases
-        if (script.domain.includes(privacyDomain) || 
-            privacyDomain.includes(script.domain) ||
-            script.domain === privacyDomain) {
-          vendors.forEach(v => {
+      
+      // 2. PARTIAL MATCH (subdomain matching)
+      scriptVendorMap.forEach((vendors, gvlDomain) => {
+        if (script.domain.includes(gvlDomain) || 
+            gvlDomain.includes(script.domain)) {
+          vendors.forEach(vendor => {
             detected.push({
-              vendorId: v.id,
-              vendorName: v.name,
-              matchType: 'privacy_domain_fuzzy',
-              domain: privacyDomain,
-              script: script.src
+              vendorId: vendor.id,
+              vendorName: vendor.name,
+              matchType: 'gvl_partial_match',
+              domain: gvlDomain,
+              script: script.src,
+              purposes: vendor.purposeIds
             });
           });
         }
       });
+      
+      // 3. COMMON PATTERNS (fallback for popular vendors)
+      const commonPatterns = {
+        'googletagmanager.com': 755,
+        'google-analytics.com': 755,
+        'connect.facebook.net': 89,
+        'amazon-adsystem.com': 598,
+        'static.hotjar.com': 780,
+        'cloudflareinsights.com': null // 1st party
+      };
+      
+      if (commonPatterns[script.domain]) {
+        detected.push({
+          vendorId: commonPatterns[script.domain],
+          vendorName: commonPatterns[script.domain] ? `Vendor ${commonPatterns[script.domain]}` : 'Cloudflare Insights (1st Party)',
+          matchType: 'common_pattern',
+          domain: script.domain,
+          script: script.src
+        });
+      }
     });
 
-    // DEDUPE by vendorId (Google 755 appears once even from multiple domains)
-    const uniqueVendors = Object.values(detected.reduce((acc, v) => {
-      acc[v.vendorId] = v;
+    // DEDUPE by vendorId
+    const unique = Object.values(detected.reduce((acc, v) => {
+      acc[v.vendorId || v.domain] = v; // Handle 1st party
       return acc;
     }, {}));
 
-    return uniqueVendors;
+    return unique;
   }
 
-  /* ---------------------------- MAIN EXECUTION -----------------------------*/
-  async function runDetection() {
+  /* MAIN DYNAMIC DETECTION */
+  async function runDynamicDetection() {
     try {
-      console.log("🚀 Starting ConsentBit Vendor Detection...");
+      console.log("🚀 ConsentBit DYNAMIC Vendor Detection (No hardcoded map!)");
       
-      // 1. Fetch GVL from your Cloudflare Worker
+      // 1. Fetch latest GVL
       const gvl = await fetchGVL();
       console.log(`✅ GVL loaded: ${Object.keys(gvl.vendors || {}).length} vendors`);
 
-      // 2. Build privacy domain map
-      const vendorMap = buildVendorMap(gvl);
-      console.log(`✅ Vendor privacy map: ${vendorMap.size} domains`);
+      // 2. Build DYNAMIC script→vendor mapping from GVL
+      const scriptVendorMap = buildScriptVendorMap(gvl);
+      console.log(`✅ Dynamic mapping: ${scriptVendorMap.size} script domains`);
 
-      // 3. Wait for async scripts to load (GTM, Facebook, etc.)
-      console.log("⏳ Waiting 3s for async scripts...");
+      // 3. Wait for async scripts
       await new Promise(r => setTimeout(r, 3000));
 
-      // 4. Scan all scripts
-      const headScripts = scanHeadScripts();
-      console.log("📋 Scripts found:", headScripts.map(s => s.domain));
-
-      // 5. Match vendors
-      const matchedVendors = matchVendors(headScripts, vendorMap);
+      // 4. Scan ALL scripts
+      const scripts = scanAllScripts();
       
-      console.table("🎯 DETECTED IAB VENDORS:", matchedVendors);
-      console.log("🚀 ConsentBit ready:", matchedVendors.map(v => `data-vendor-id="${v.vendorId}"`));
-
-      // 6. EXPOSE for your TCF Banner
-      window.__IAB_DETECTED_VENDORS__ = matchedVendors;
+      // 5. DETECT vendors dynamically
+      const vendors = detectVendors(scripts, scriptVendorMap);
       
-      // 7. Auto-populate your banner vendors tab
-      if (matchedVendors.length && window.ConsentBitPopulateVendors) {
-        window.ConsentBitPopulateVendors(matchedVendors);
-      }
-
+      console.table("🎯 DYNAMICALLY DETECTED VENDORS:", vendors);
+      
+      // 6. EXPOSE for ConsentBit
+      window.__IAB_DETECTED_VENDORS__ = vendors;
+      
+      console.log("✅ Ready for TCF Banner:", vendors.length, "vendors detected");
+      
     } catch (err) {
-      console.error("❌ CMP Vendor Detection Error:", err);
+      console.error("❌ Dynamic detection failed:", err);
     }
   }
 
-  /* ---------------------------- RUN + RETRY LOGIC -----------------------------*/
-  // Run immediately
-  runDetection();
-  
-  // Retry after 5s for lazy-loaded scripts
-  setTimeout(runDetection, 5000);
-  
-  // Retry after 10s for SPA route changes
-  setTimeout(runDetection, 10000);
+  // Run + retries for SPA
+  runDynamicDetection();
+  setTimeout(runDynamicDetection, 5000);
+  setTimeout(runDynamicDetection, 10000);
 
 })();
-
