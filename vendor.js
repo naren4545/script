@@ -1,5 +1,5 @@
 (async function () {
-  const GVL_URL = "https://ancient-wind-15ae.narendra-3c5.workers.dev/gvl";
+  const GVL_URL = "https://ancient-wind-15ae.narendra-3c5.workers.dev/gvl/vendor-list.json";
 
   /* ---------------------------- DYNAMIC VENDOR DETECTION -----------------------------*/
   async function fetchGVL() {
