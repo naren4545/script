@@ -1833,7 +1833,7 @@ document.querySelector('[data-consent-id="personalization-checkbox"]');
             document.querySelector('.consentbit-ccpa-banner-div'), 
             document.querySelector('.consentbit-ccpa_preference'), 
             document.querySelector('.consentbit-gdpr-banner-div'), 
-            document.querySelector('.consentbit-preference_div'), 
+            
           ]; 
  
           // Find the currently visible banner 
