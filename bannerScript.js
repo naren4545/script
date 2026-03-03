@@ -906,7 +906,7 @@ div#banner-code {
     justify-content: flex-start;
     align-items: center;
     max-width: 435px;
-    max-height: 510px;
+   
     padding: 20px;
     font-family: ${custom.font};
     position: relative;
