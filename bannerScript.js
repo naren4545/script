@@ -1369,6 +1369,52 @@ div#banner-code {
   	transform: none;
     }
   }
+
+  [customtoggle="true"] {
+    position: relative;
+    display: inline-block;
+    width: 49px;
+    height: 24px
+}
+
+[customtoggle="true"] .w-checkbox-input {
+    opacity: 0;
+    width: 0;
+    height: 0
+}
+
+[customtoggle="true"] .w-form-label {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    border-radius: 34px;
+    transition: .4s
+}
+
+[customtoggle="true"] .w-form-label:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 2px;
+    bottom: 2px;
+    background-color: white;
+    border-radius: 50%;
+    transition: .4s
+}
+
+[customtoggle="true"] .w-checkbox-input:checked + .w-form-label {
+    background-color: #4A00E0
+}
+
+[customtoggle="true"] .w-checkbox-input:checked + .w-form-label:before {
+    transform: translateX(26px)
+}
+
 </style>
 
 <span style="font-family:${custom.font}; position:absolute; opacity:0; left:-9999px;">font-preload</span>
