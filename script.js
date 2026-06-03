@@ -830,7 +830,7 @@ fetch('https://framer.consentbit.com/api/visitor-token', {
  const requestBody =fullPayload
  
       const response = await 
-fetch("https://framer.consentbit.com/consent", { 
+fetch("https://manager.consentbit.com/api/framer-consent", { 
         method: "POST", 
         headers: { 
           "Content-Type": "application/json", 
