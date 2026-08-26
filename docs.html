@@ -1,0 +1,1129 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>syncWA — How the sync actually works</title>
+<style>
+:root{
+  --bg:#fbfaf9; --panel:#ffffff; --ink:#1c1b19; --ink-2:#57534e; --ink-3:#8a827a;
+  --line:#e7e2dc; --line-2:#d6cfc7;
+  --accent:#b4530a; --accent-soft:#fdf3e7;
+  --at:#c2410c; --at-bg:#fff3ec;
+  --wf:#1d4ed8; --wf-bg:#eef2ff;
+  --cf:#a16207; --cf-bg:#fefce8;
+  --do:#6d28d9; --do-bg:#f5f1fe;
+  --ok:#15803d; --ok-bg:#f0fdf4;
+  --warn:#a16207; --warn-bg:#fffbeb;
+  --err:#b91c1c; --err-bg:#fef2f2;
+  --code-bg:#f6f3f0; --code-ink:#292524;
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){
+:root{
+  --bg:#16150f; --panel:#1e1d17; --ink:#ece7df; --ink-2:#b0a89d; --ink-3:#857d72;
+  --line:#302e26; --line-2:#413e34;
+  --accent:#f0a35e; --accent-soft:#2a2116;
+  --at:#fb923c; --at-bg:#2a1a10;
+  --wf:#93b4fd; --wf-bg:#161d33;
+  --cf:#facc15; --cf-bg:#2a2410;
+  --do:#c4b5fd; --do-bg:#211a35;
+  --ok:#86efac; --ok-bg:#10231a;
+  --warn:#fcd34d; --warn-bg:#2a2210;
+  --err:#fca5a5; --err-bg:#2c1616;
+  --code-bg:#141310; --code-ink:#ddd6cc;
+}
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:1.5rem}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font:16px/1.65 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1180px;margin:0 auto;padding:0 1.25rem;display:grid;grid-template-columns:230px 1fr;gap:2.5rem}
+@media(max-width:900px){.wrap{grid-template-columns:1fr;gap:0}}
+
+/* ---------- nav ---------- */
+nav{position:sticky;top:0;align-self:start;max-height:100vh;overflow-y:auto;padding:2rem 0 3rem}
+@media(max-width:900px){nav{position:static;max-height:none;border-bottom:1px solid var(--line);margin-bottom:1rem}}
+nav .navtitle{font-size:.7rem;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);margin:0 0 .7rem;font-weight:650}
+nav ol{list-style:none;margin:0;padding:0;counter-reset:n}
+nav li{counter-increment:n;margin:1px 0}
+nav a{
+  display:block;padding:.3rem .55rem;border-radius:6px;text-decoration:none;
+  color:var(--ink-2);font-size:.845rem;line-height:1.35;border-left:2px solid transparent;
+}
+nav a::before{content:counter(n) ".";color:var(--ink-3);margin-right:.4rem;font-variant-numeric:tabular-nums;font-size:.78rem}
+nav a:hover{background:var(--accent-soft);color:var(--ink);border-left-color:var(--accent)}
+
+/* ---------- content ---------- */
+main{padding:2rem 0 6rem;min-width:0}
+header.hero{border-bottom:1px solid var(--line);padding-bottom:1.75rem;margin-bottom:2.5rem}
+h1{font-size:2rem;line-height:1.15;margin:0 0 .5rem;letter-spacing:-.02em;font-weight:700}
+.sub{color:var(--ink-2);margin:0;font-size:1.02rem;max-width:60ch}
+.stamp{margin-top:1rem;font-family:var(--mono);font-size:.75rem;color:var(--ink-3)}
+
+section{margin:0 0 3.5rem;scroll-margin-top:1.5rem}
+h2{
+  font-size:1.32rem;margin:0 0 .3rem;letter-spacing:-.015em;font-weight:680;
+  padding-top:.4rem;
+}
+h2 .num{color:var(--accent);font-family:var(--mono);font-size:.9rem;margin-right:.55rem;font-weight:600}
+h3{font-size:1.02rem;margin:2rem 0 .55rem;font-weight:650;letter-spacing:-.005em}
+h4{font-size:.9rem;margin:1.3rem 0 .4rem;font-weight:650;color:var(--ink-2)}
+p{margin:.7rem 0;max-width:74ch}
+.lede{color:var(--ink-2);margin:0 0 1.4rem;max-width:70ch}
+ul,ol{max-width:74ch;padding-left:1.2rem}
+li{margin:.35rem 0}
+strong{font-weight:650}
+a{color:var(--accent)}
+
+/* ---------- code ---------- */
+pre{
+  background:var(--code-bg);color:var(--code-ink);border:1px solid var(--line);
+  border-radius:8px;padding:.9rem 1rem;overflow-x:auto;font-family:var(--mono);
+  font-size:.795rem;line-height:1.6;margin:.85rem 0;
+}
+code{font-family:var(--mono);font-size:.86em}
+:not(pre)>code{background:var(--code-bg);padding:.1em .38em;border-radius:4px;border:1px solid var(--line)}
+pre code{background:none;border:0;padding:0;font-size:1em}
+.c{color:var(--ink-3);font-style:italic}      /* comment */
+.k{color:var(--do);font-weight:600}           /* keyword */
+.s{color:var(--ok)}                           /* string  */
+.f{color:var(--wf)}                           /* fn name */
+.hl{background:var(--accent-soft);border-radius:3px;padding:.05em .2em;box-shadow:0 0 0 1px var(--line-2)}
+
+/* ---------- file ref badge ---------- */
+.ref{
+  display:inline-block;font-family:var(--mono);font-size:.735rem;
+  background:var(--panel);border:1px solid var(--line-2);border-radius:5px;
+  padding:.1rem .42rem;color:var(--ink-2);white-space:nowrap;
+}
+.ref b{color:var(--accent);font-weight:600}
+.codehead{
+  display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;
+  margin:1.1rem 0 -.35rem;
+}
+.codehead .what{font-size:.83rem;color:var(--ink-2)}
+
+/* ---------- callouts ---------- */
+.note{border-left:3px solid var(--line-2);background:var(--panel);padding:.8rem 1rem;border-radius:0 8px 8px 0;margin:1.1rem 0;font-size:.92rem}
+.note p{margin:.35rem 0}
+.note.why{border-left-color:var(--accent);background:var(--accent-soft)}
+.note.warn{border-left-color:var(--warn);background:var(--warn-bg)}
+.note.gap{border-left-color:var(--err);background:var(--err-bg)}
+.note.ok{border-left-color:var(--ok);background:var(--ok-bg)}
+.note .tag{
+  display:block;font-size:.68rem;letter-spacing:.09em;text-transform:uppercase;
+  font-weight:700;margin-bottom:.25rem;color:var(--ink-2);
+}
+.note.why .tag{color:var(--accent)} .note.warn .tag{color:var(--warn)}
+.note.gap .tag{color:var(--err)}    .note.ok .tag{color:var(--ok)}
+
+/* ---------- tables ---------- */
+.tscroll{overflow-x:auto;margin:1rem 0;border:1px solid var(--line);border-radius:8px;background:var(--panel)}
+table{border-collapse:collapse;width:100%;font-size:.855rem;min-width:520px}
+th,td{text-align:left;padding:.52rem .8rem;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-weight:650;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);background:var(--bg)}
+tr:last-child td{border-bottom:0}
+td code{font-size:.8rem}
+
+/* ---------- diagram primitives ---------- */
+.diagram{
+  background:var(--panel);border:1px solid var(--line);border-radius:10px;
+  padding:1.4rem 1.1rem;margin:1.3rem 0;overflow-x:auto;
+}
+.diagram .cap{font-size:.74rem;color:var(--ink-3);text-align:center;margin-top:1rem;letter-spacing:.02em}
+.chain{display:flex;align-items:stretch;gap:0;flex-wrap:nowrap;min-width:min-content;justify-content:center}
+.node{
+  border:1px solid var(--line-2);border-radius:8px;padding:.6rem .8rem;background:var(--bg);
+  min-width:118px;text-align:center;
+}
+.node .t{font-family:var(--mono);font-size:.775rem;font-weight:600;display:block}
+.node .d{font-size:.7rem;color:var(--ink-3);display:block;margin-top:.15rem;line-height:1.35}
+.arrow{display:flex;align-items:center;padding:0 .45rem;color:var(--ink-3);font-size:1.1rem;flex:0 0 auto}
+.node.at{border-color:var(--at);background:var(--at-bg)} .node.at .t{color:var(--at)}
+.node.wf{border-color:var(--wf);background:var(--wf-bg)} .node.wf .t{color:var(--wf)}
+.node.cf{border-color:var(--cf);background:var(--cf-bg)} .node.cf .t{color:var(--cf)}
+.node.do{border-color:var(--do);background:var(--do-bg)} .node.do .t{color:var(--do)}
+.node.ok{border-color:var(--ok);background:var(--ok-bg)} .node.ok .t{color:var(--ok)}
+
+.stack{display:flex;flex-direction:column;align-items:center;gap:.4rem}
+.vline{width:1px;height:18px;background:var(--line-2)}
+.vlabel{font-size:.68rem;color:var(--ink-3);font-family:var(--mono)}
+
+/* numbered step list */
+.steps{list-style:none;padding:0;margin:1.1rem 0;counter-reset:s}
+.steps>li{
+  counter-increment:s;position:relative;padding:.1rem 0 1.15rem 2.4rem;margin:0;
+  border-left:1px solid var(--line);
+}
+.steps>li:last-child{border-left-color:transparent;padding-bottom:0}
+.steps>li::before{
+  content:counter(s);position:absolute;left:-13px;top:0;width:26px;height:26px;
+  border-radius:50%;background:var(--panel);border:1px solid var(--line-2);
+  display:grid;place-items:center;font-size:.75rem;font-weight:700;color:var(--accent);
+  font-family:var(--mono);
+}
+.steps .st{font-weight:650;display:block;margin-bottom:.15rem}
+.steps p{margin:.3rem 0;font-size:.93rem}
+
+.pill{display:inline-block;font-size:.7rem;font-weight:650;padding:.1rem .45rem;border-radius:20px;letter-spacing:.02em}
+.pill.create{background:var(--ok-bg);color:var(--ok);border:1px solid var(--ok)}
+.pill.update{background:var(--wf-bg);color:var(--wf);border:1px solid var(--wf)}
+.pill.skip{background:var(--code-bg);color:var(--ink-3);border:1px solid var(--line-2)}
+.pill.fail{background:var(--err-bg);color:var(--err);border:1px solid var(--err)}
+
+hr{border:0;border-top:1px solid var(--line);margin:2.5rem 0}
+.kv{font-family:var(--mono);font-size:.78rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<nav>
+  <p class="navtitle">Contents</p>
+  <ol>
+    <li><a href="#overview">The 60-second version</a></li>
+    <li><a href="#map">Map of every file</a></li>
+    <li><a href="#setup">Setup: tokens &amp; connection</a></li>
+    <li><a href="#trigger">Starting a run</a></li>
+    <li><a href="#chain">The job chain</a></li>
+    <li><a href="#page">Inside one page</a></li>
+    <li><a href="#ledger">The ledger (Durable Object)</a></li>
+    <li><a href="#transform">Transform: values → Webflow</a></li>
+    <li><a href="#finalize">Finalize &amp; orphans</a></li>
+    <li><a href="#cursor">Incremental &amp; the cursor</a></li>
+    <li><a href="#live">Live status (WebSocket)</a></li>
+    <li><a href="#errors">Errors &amp; retries</a></li>
+    <li><a href="#limits">Rate limits</a></li>
+    <li><a href="#twoway">Two-way sync groundwork</a></li>
+    <li><a href="#lookup">“Where do I look?”</a></li>
+    <li><a href="#glossary">Glossary</a></li>
+  </ol>
+</nav>
+
+<main>
+
+<header class="hero">
+  <h1>How the sync actually works</h1>
+  <p class="sub">Every stage of an Airtable&nbsp;→&nbsp;Webflow run, in order, with the code that does it and the exact file and line to open.</p>
+  <p class="stamp">syncWA · engine + dashboard · generated from the working tree</p>
+</header>
+
+<!-- ============================================================ 1 -->
+<section id="overview">
+<h2><span class="num">01</span>The 60-second version</h2>
+<p class="lede">Airtable is the source of truth. Webflow receives whatever Airtable says. The hard part is <em>not writing things that have not changed</em> — that is what the ledger exists for.</p>
+
+<p>There are <strong>two separate Cloudflare Workers</strong>. They share storage but deploy independently.</p>
+
+<div class="diagram">
+  <div class="chain">
+    <div class="node cf"><span class="t">syncwa-web</span><span class="d">Next.js dashboard<br>UI + API routes</span></div>
+    <div class="arrow">→</div>
+    <div class="node"><span class="t">syncwa-jobs</span><span class="d">Cloudflare Queue<br>one queue, 3 job types</span></div>
+    <div class="arrow">→</div>
+    <div class="node cf"><span class="t">syncwa-engine</span><span class="d">queue consumer<br>+ cron + WebSocket</span></div>
+    <div class="arrow">→</div>
+    <div class="node do"><span class="t">SyncConnection</span><span class="d">Durable Object<br>one per connection</span></div>
+  </div>
+  <p class="cap">The dashboard only ever <em>produces</em> jobs. The engine consumes them and owns all upstream API calls.</p>
+</div>
+
+<h3>Why two Workers?</h3>
+<p>A Next.js request has a lifecycle; a 20,000-row sync does not fit inside one. Splitting them means the dashboard stays instant and the engine can take as long as it needs, one small job at a time.</p>
+
+<h3>What lives where</h3>
+<div class="tscroll"><table>
+<thead><tr><th>Store</th><th>Holds</th><th>Why there</th></tr></thead>
+<tbody>
+<tr><td><span class="ref">KV <b>SYNC_KV</b></span></td><td>Connection config, encrypted API tokens, cached schemas</td><td>Read-heavy, rarely written, eventual consistency is fine</td></tr>
+<tr><td><span class="ref">DO <b>SYNC_DO</b></span></td><td>The per-record ledger, run state, logs</td><td>Needs <strong>atomic</strong> read-modify-write. KV cannot do this.</td></tr>
+<tr><td><span class="ref">R2 <b>MEDIA</b></span></td><td>Rehosted Airtable attachments</td><td>Airtable's own URLs expire in hours</td></tr>
+<tr><td><span class="ref">Queue <b>SYNC_QUEUE</b></span></td><td>Jobs in flight</td><td>Retries, backoff, durability between steps</td></tr>
+</tbody></table></div>
+
+<div class="note why"><span class="tag">The one idea to hold onto</span>
+<p>Every record is hashed. The hash is stored. On the next run the record is hashed again — if the hash matches, <strong>no Webflow call happens at all</strong>. On a table where 10 rows changed out of 5,000, the run makes 10 writes, not 5,000.</p></div>
+</section>
+
+<!-- ============================================================ 2 -->
+<section id="map">
+<h2><span class="num">02</span>Map of every file</h2>
+<p class="lede">Open this table when you know <em>what</em> you want but not <em>where</em> it is.</p>
+
+<h3>The engine</h3>
+<div class="tscroll"><table>
+<thead><tr><th>File</th><th>What it does</th></tr></thead>
+<tbody>
+<tr><td><span class="ref">worker/<b>index.ts</b></span></td><td>Queue consumer, cron scheduler, WebSocket entrypoint, retry policy. The orchestrator.</td></tr>
+<tr><td><span class="ref">worker/<b>sync-connection.ts</b></span></td><td>The Durable Object. Ledger, run state, logs, live broadcast.</td></tr>
+<tr><td><span class="ref">worker/<b>wrangler.jsonc</b></span></td><td>Engine bindings, queue consumer config, cron trigger, DO migration.</td></tr>
+</tbody></table></div>
+
+<h3>Shared library</h3>
+<div class="tscroll"><table>
+<thead><tr><th>File</th><th>What it does</th></tr></thead>
+<tbody>
+<tr><td><span class="ref">lib/<b>types.ts</b></span></td><td>Every shared type: <code>Connection</code>, <code>Job</code>, <code>RunState</code>, <code>LedgerEntry</code>, <code>FieldBase</code>.</td></tr>
+<tr><td><span class="ref">lib/<b>airtable.ts</b></span></td><td>Airtable REST client. Pagination, the incremental filter formula.</td></tr>
+<tr><td><span class="ref">lib/<b>webflow.ts</b></span></td><td>Webflow Data API v2 client. Six endpoints, nothing more.</td></tr>
+<tr><td><span class="ref">lib/<b>http.ts</b></span></td><td><code>Pacer</code> (rate limiting), retry-with-backoff, <code>ApiError</code>.</td></tr>
+<tr><td><span class="ref">lib/<b>hash.ts</b></span></td><td>Canonical JSON + SHA-256. The change-detection primitive.</td></tr>
+<tr><td><span class="ref">lib/<b>transform.ts</b></span></td><td>Airtable cell → Webflow <code>fieldData</code>. Also the cheap <code>hashInput</code>.</td></tr>
+<tr><td><span class="ref">lib/<b>values.ts</b></span></td><td>Primitive coercion (<code>toPlainText</code>, <code>toNumber</code>, <code>toDateTime</code>), dependency-free.</td></tr>
+<tr><td><span class="ref">lib/<b>compare.ts</b></span></td><td>Three-way merge: canonical forms, per-field base, <code>diffField</code>. <em>Built, not yet wired.</em></td></tr>
+<tr><td><span class="ref">lib/<b>field-types.ts</b></span></td><td>Which Airtable type can feed which Webflow type. Mapping suggestions.</td></tr>
+<tr><td><span class="ref">lib/<b>media.ts</b></span></td><td>Attachment → R2 rehosting.</td></tr>
+<tr><td><span class="ref">lib/<b>slug.ts</b></span></td><td>Slug generation, de-duplicated by record id.</td></tr>
+<tr><td><span class="ref">lib/<b>crypto.ts</b></span></td><td>AES-GCM wrapping for tokens before they touch KV.</td></tr>
+<tr><td><span class="ref">lib/<b>ticket.ts</b></span></td><td>HMAC-signed 60-second tickets for the status WebSocket.</td></tr>
+<tr><td><span class="ref">lib/<b>kv.ts</b></span></td><td>KV key schema and typed accessors.</td></tr>
+<tr><td><span class="ref">lib/<b>validate.ts</b></span></td><td>Connection request-body validation with actionable error messages.</td></tr>
+<tr><td><span class="ref">lib/<b>server.ts</b></span></td><td>Server-only helpers: <code>getEnv</code>, <code>stubFor</code>, <code>handle</code>, <code>HttpError</code>.</td></tr>
+<tr><td><span class="ref">lib/<b>client.ts</b></span></td><td>Browser <code>fetch</code> wrapper + time formatting.</td></tr>
+</tbody></table></div>
+
+<h3>The dashboard</h3>
+<div class="tscroll"><table>
+<thead><tr><th>Route</th><th>What it does</th></tr></thead>
+<tbody>
+<tr><td><span class="ref">api/settings</span></td><td><code>PUT</code> verifies both tokens live, then encrypts and stores them.</td></tr>
+<tr><td><span class="ref">api/connections</span></td><td><code>GET</code> list with state · <code>POST</code> create.</td></tr>
+<tr><td><span class="ref">api/connections/[id]</span></td><td><code>GET</code> · <code>PATCH</code> · <code>DELETE</code>.</td></tr>
+<tr><td><span class="ref">api/connections/[id]/sync</span></td><td><code>POST</code> — validates, then enqueues <code>sync.start</code>.</td></tr>
+<tr><td><span class="ref">api/connections/[id]/logs</span></td><td><code>GET</code> — polling fallback for state + logs.</td></tr>
+<tr><td><span class="ref">api/connections/[id]/stream-ticket</span></td><td><code>POST</code> — mints the signed WebSocket URL.</td></tr>
+<tr><td><span class="ref">api/connections/[id]/reset</span></td><td><code>POST</code> — wipes the ledger. Destructive.</td></tr>
+<tr><td><span class="ref">api/mapping-suggestion</span></td><td><code>GET</code> — both schemas + a proposed field mapping.</td></tr>
+</tbody></table></div>
+</section>
+
+<!-- ============================================================ 3 -->
+<section id="setup">
+<h2><span class="num">03</span>Setup: tokens &amp; connection</h2>
+<p class="lede">Two different things get called “connection”. Keep them apart or the rest is confusing.</p>
+
+<div class="tscroll"><table>
+<thead><tr><th></th><th>What it is</th><th>Stored at</th><th>Network-verified?</th></tr></thead>
+<tbody>
+<tr><td><strong>Credentials</strong></td><td>One Airtable PAT + one Webflow token, <em>per deployment</em></td><td><code>cred:workspace</code> in KV</td><td><strong>Yes</strong> — live API call</td></tr>
+<tr><td><strong>A Connection</strong></td><td>One Airtable table → one Webflow collection, plus field mappings</td><td><code>conn:{uuid}</code> in KV</td><td>No — shape validation only</td></tr>
+</tbody></table></div>
+
+<h3>Step 1 — Tokens are verified before they are stored</h3>
+<div class="codehead"><span class="ref">app/api/settings/route.ts:<b>31–50</b></span><span class="what">the only live credential check in the app</span></div>
+<pre><code><span class="c">// Fail here rather than three screens later inside a queue consumer.</span>
+<span class="k">try</span> {
+  <span class="k">await new</span> <span class="f">AirtableClient</span>(airtableToken).<span class="f">verify</span>();
+} <span class="k">catch</span> (error) {
+  <span class="k">throw new</span> <span class="f">HttpError</span>(400,
+    `Airtable rejected that token. ${<span class="f">describeApiError</span>(error)}. ` +
+    `The token needs data.records:read and schema.bases:read scopes…`);
+}
+
+<span class="k">try</span> {
+  <span class="k">await new</span> <span class="f">WebflowClient</span>(webflowToken).<span class="f">verify</span>();
+} <span class="k">catch</span> (error) { <span class="c">/* …same shape… */</span> }
+
+<span class="k">await</span> <span class="f">putCredentials</span>(env, { airtableToken, webflowToken });</code></pre>
+
+<p><code>verify()</code> is just the cheapest authenticated <code>GET</code> each API offers — <code>/meta/bases</code> <span class="ref">lib/airtable.ts:<b>163</b></span> and <code>/sites</code> <span class="ref">lib/webflow.ts:<b>186</b></span>. Both pass <code>maxAttempts: 2</code>, because a rejected token is not a transient failure worth five retries.</p>
+
+<div class="note warn"><span class="tag">Scopes you actually need</span>
+<p><strong>Webflow:</strong> CMS read <em>and</em> write, plus <strong>Sites: read</strong>. The Sites scope is easy to miss — <code>verify()</code> calls <code>GET /v2/sites</code>, so without it saving fails immediately with an error message that only mentions CMS.</p>
+<p><strong>Airtable:</strong> <code>data.records:read</code> + <code>schema.bases:read</code>, with at least one base added to the token's access list.</p>
+<p>No Webflow <em>assets</em> scope is needed — attachments go to R2 and Webflow only ever receives a URL string.</p></div>
+
+<h3>Step 2 — Tokens are encrypted before KV</h3>
+<div class="codehead"><span class="ref">lib/crypto.ts:<b>39–51</b></span><span class="what">AES-GCM, fresh IV per write</span></div>
+<pre><code><span class="c">/** Returns base64(iv || ciphertext). */</span>
+<span class="k">export async function</span> <span class="f">encryptJson</span>(secret: string, value: unknown) {
+  <span class="k">const</span> key = <span class="k">await</span> <span class="f">importKey</span>(secret);          <span class="c">// must decode to 32 bytes</span>
+  <span class="k">const</span> iv  = crypto.<span class="f">getRandomValues</span>(<span class="k">new</span> Uint8Array(12));
+  <span class="k">const</span> ciphertext = <span class="k">await</span> crypto.subtle.<span class="f">encrypt</span>({ name: <span class="s">"AES-GCM"</span>, iv }, key, plaintext);
+  <span class="c">// envelope = iv ++ ciphertext</span>
+}</code></pre>
+<p>The dashboard never returns a token again — <code>GET /api/settings</code> returns only <code>maskToken()</code> output (<code>••••abcd</code>).</p>
+
+<h3>Step 3 — Creating a connection</h3>
+<p>Every id in the new-connection wizard comes from a <strong>live API dropdown</strong>, never typed. That cascade <span class="ref">app/connections/new/page.tsx:<b>63–108</b></span> is the real verification:</p>
+<div class="diagram">
+  <div class="chain">
+    <div class="node at"><span class="t">bases</span><span class="d">GET /meta/bases</span></div>
+    <div class="arrow">→</div>
+    <div class="node at"><span class="t">tables</span><span class="d">?baseId=…</span></div>
+    <div class="arrow">→</div>
+    <div class="node wf"><span class="t">sites</span><span class="d">GET /v2/sites</span></div>
+    <div class="arrow">→</div>
+    <div class="node wf"><span class="t">collections</span><span class="d">?siteId=…</span></div>
+    <div class="arrow">→</div>
+    <div class="node ok"><span class="t">mapping</span><span class="d">both schemas<br>+ suggestion</span></div>
+  </div>
+  <p class="cap">By the time “Create connection” is clickable, every id came from a successful authenticated response.</p>
+</div>
+
+<p><code>POST /api/connections</code> is three lines; all the checking is in <span class="ref">lib/validate.ts</span>:</p>
+<div class="tscroll"><table>
+<thead><tr><th>Check</th><th>Line</th><th>Why it matters</th></tr></thead>
+<tbody>
+<tr><td>Two Airtable fields → same Webflow slug</td><td><code>49–54</code></td><td>Silent data loss otherwise; last write wins</td></tr>
+<tr><td><code>webflowFieldType</code> in a 13-type whitelist</td><td><code>57–60</code></td><td>Unsupported types become a cryptic 400 mid-run</td></tr>
+<tr><td><code>deleteBehavior</code> ∈ archive/ignore/delete</td><td><code>83–85</code></td><td>A typo could mean <em>delete</em> instead of <em>archive</em></td></tr>
+<tr><td><code>intervalMinutes ≥ 5</code></td><td><code>88–93</code></td><td>Cron only fires every 5 min — anything less is a lie</td></tr>
+</tbody></table></div>
+
+<div class="note why"><span class="tag">Remember this line</span>
+<p><span class="ref">lib/validate.ts:<b>98</b></span> — <code>id: existing?.id ?? crypto.randomUUID()</code>. That UUID becomes the <strong>Durable Object name</strong> via <code>idFromName(connectionId)</code>. It is the thread running through the entire system.</p></div>
+</section>
+
+<!-- ============================================================ 4 -->
+<section id="trigger">
+<h2><span class="num">04</span>Starting a run</h2>
+<p class="lede">Three entry points, one destination: a <code>sync.start</code> message on the queue.</p>
+
+<div class="tscroll"><table>
+<thead><tr><th>Trigger</th><th>Where</th><th>Mode chosen</th></tr></thead>
+<tbody>
+<tr><td>“Full sync” / “Sync changes” button</td><td><span class="ref">api/connections/[id]/sync:<b>22</b></span></td><td>Only the literal string <code>"incremental"</code> gives incremental. Everything else → <strong>full</strong>.</td></tr>
+<tr><td>Cron, every 5 minutes</td><td><span class="ref">worker/index.ts:<b>435</b></span></td><td><code>state.cursor ? "incremental" : "full"</code></td></tr>
+<tr><td>First ever run</td><td>—</td><td>Always full: no cursor exists yet.</td></tr>
+</tbody></table></div>
+
+<h3>What the route does — and does not do</h3>
+<p>It validates and enqueues. <strong>No Airtable call, no Webflow call, no DO write.</strong> The run does not exist yet when the HTTP response returns.</p>
+
+<div class="codehead"><span class="ref">app/api/connections/[id]/sync/route.ts:<b>26–49</b></span></div>
+<pre><code><span class="k">if</span> (state?.status === <span class="s">"running"</span>) {
+  <span class="c">// Without a staleness escape a genuinely stuck run would block every</span>
+  <span class="c">// future manual sync forever. Taking over is safe: each job checks</span>
+  <span class="c">// `state.runId` and the superseded chain abandons itself.</span>
+  <span class="k">const</span> stuckFor = Date.<span class="f">now</span>() - Date.<span class="f">parse</span>(state.startedAt);
+  <span class="k">if</span> (stuckFor &lt; STUCK_RUN_MS) <span class="k">throw new</span> <span class="f">HttpError</span>(409, <span class="s">"A sync has been running…"</span>);
+}
+
+<span class="k">if</span> (mode === <span class="s">"incremental"</span> &amp;&amp; !state?.cursor) {
+  <span class="k">throw new</span> <span class="f">HttpError</span>(400, <span class="s">"No previous successful run to be incremental against."</span>);
+}
+
+<span class="k">const</span> runId = crypto.<span class="f">randomUUID</span>();          <span class="c">// ← minted HERE, in the dashboard</span>
+<span class="k">await</span> env.SYNC_QUEUE.<span class="f">send</span>({ type: <span class="s">"sync.start"</span>, connectionId: id, runId, mode });</code></pre>
+
+<h3>Why “taking over” a stuck run is safe</h3>
+<p>Run <strong>A</strong> died mid-chain. The DO still says <code>running, runId: A</code>. After 30 minutes you are allowed through, and run <strong>B</strong> begins:</p>
+<div class="diagram">
+  <div class="stack">
+    <div class="node do"><span class="t">DO state: runId = A</span></div>
+    <div class="vline"></div><span class="vlabel">sync.start(B) → beginRun overwrites</span><div class="vline"></div>
+    <div class="node do"><span class="t">DO state: runId = B</span></div>
+    <div class="vline"></div><span class="vlabel">stale sync.page(A, 4) arrives</span><div class="vline"></div>
+    <div class="node"><span class="t">state.runId !== job.runId</span><span class="d">→ return. Chain A dies silently.</span></div>
+  </div>
+  <p class="cap">That guard appears twice: <span class="ref">worker/index.ts:<b>109</b></span> and <span class="ref">worker/index.ts:<b>281</b></span></p>
+</div>
+
+<div class="note ok"><span class="tag">No work is lost</span>
+<p>The ledger is keyed by <em>record</em>, not by run. A's committed records are already stored with their hashes, so B's <code>claim()</code> returns <span class="pill skip">skip</span> for every one. <strong>B resumes where A stopped.</strong></p></div>
+
+<div class="note gap"><span class="tag">Two real gaps</span>
+<p><strong>Paused connections accept syncs that never run.</strong> The sync route has no <code>paused</code> check, but <code>handleStart</code> returns silently at <span class="ref">worker/index.ts:<b>87</b></span>. You get <code>200 {ok:true}</code> and “Queued a full sync” — and nothing happens, not even a log line.</p>
+<p><strong>Credentials are not checked until page 0.</strong> <code>handleStart</code> never calls <code>getCredentials</code>, so a missing token lets the run start, log “sync started”, then fail six retries later.</p></div>
+</section>
+
+<!-- ============================================================ 5 -->
+<section id="chain">
+<h2><span class="num">05</span>The job chain</h2>
+<p class="lede">A run is not one long task. It is a chain of small jobs, each of which enqueues the next only after it has committed.</p>
+
+<div class="diagram">
+  <div class="chain">
+    <div class="node cf"><span class="t">sync.start</span><span class="d">open the run</span></div>
+    <div class="arrow">→</div>
+    <div class="node cf"><span class="t">sync.page 0</span><span class="d">100 records</span></div>
+    <div class="arrow">→</div>
+    <div class="node cf"><span class="t">sync.page 1</span><span class="d">100 records</span></div>
+    <div class="arrow">→</div>
+    <div class="node"><span class="t">…</span><span class="d">until no offset</span></div>
+    <div class="arrow">→</div>
+    <div class="node ok"><span class="t">sync.finalize</span><span class="d">orphans + close</span></div>
+  </div>
+  <p class="cap">All three types share <strong>one</strong> queue, <code>syncwa-jobs</code>, discriminated by <code>job.type</code>.</p>
+</div>
+
+<h3>Why a chain instead of a loop</h3>
+<ul>
+<li><strong>No memory ceiling.</strong> No invocation ever holds more than 100 records.</li>
+<li><strong>Every step is individually retryable.</strong> Page 7 failing retries page 7, not the whole table.</li>
+<li><strong>Naturally sequential.</strong> Page N+1 does not exist until page N committed.</li>
+</ul>
+
+<h3>The dispatch</h3>
+<div class="codehead"><span class="ref">worker/index.ts:<b>331–340</b></span><span class="what">no <code>default</code> — the union is closed, so TS proves exhaustiveness</span></div>
+<pre><code><span class="k">switch</span> (job.type) {
+  <span class="k">case</span> <span class="s">"sync.start"</span>:    <span class="k">return</span> <span class="f">handleStart</span>(env, job);
+  <span class="k">case</span> <span class="s">"sync.page"</span>:     <span class="k">return</span> <span class="f">handlePage</span>(env, job);
+  <span class="k">case</span> <span class="s">"sync.finalize"</span>: <span class="k">return</span> <span class="f">handleFinalize</span>(env, job);
+}</code></pre>
+
+<h3>Queue configuration</h3>
+<div class="codehead"><span class="ref">worker/wrangler.jsonc:<b>33–42</b></span></div>
+<pre><code>{
+  <span class="s">"queue"</span>: <span class="s">"syncwa-jobs"</span>,
+  <span class="s">"max_batch_size"</span>: 5,       <span class="c">// up to 5 jobs per invocation</span>
+  <span class="s">"max_batch_timeout"</span>: 5,    <span class="c">// …or after 5s</span>
+  <span class="s">"max_concurrency"</span>: 1,      <span class="c">// ONE invocation at a time, queue-wide</span>
+  <span class="s">"max_retries"</span>: 5,
+  <span class="s">"dead_letter_queue"</span>: <span class="s">"syncwa-dlq"</span>
+}</code></pre>
+
+<div class="note warn"><span class="tag">The scaling constraint</span>
+<p><code>max_concurrency: 1</code> is <strong>one lane for the entire queue</strong>, not one per connection. Connection B's sync waits behind all of connection A's pages. That is deliberate — it is what keeps you under both APIs' rate limits — but it is the first thing you will hit as connections multiply. The fix is a queue per connection, not raising concurrency.</p></div>
+
+<div class="note gap"><span class="tag">syncwa-dlq has no consumer</span>
+<p>Almost nothing reaches it: <span class="ref">worker/index.ts:<b>376–405</b></span> catches errors itself and always <code>ack()</code>s. Only an invocation that <em>dies</em> (CPU limit, OOM) produces a dead letter. When that happens the chain simply stops — the run sits at <code>running</code> until the 30-minute stuck threshold, with nothing logged. Adding a DLQ consumer that calls <code>finishRun</code> with an explanation is ~15 lines.</p></div>
+</section>
+
+<!-- ============================================================ 6 -->
+<section id="page">
+<h2><span class="num">06</span>Inside one page — the core loop</h2>
+<p class="lede"><code>handlePage</code> <span class="ref">worker/index.ts:<b>99–272</b></span> is where everything actually happens. Eight steps.</p>
+
+<ol class="steps">
+
+<li><span class="st">Load config and guard against staleness</span>
+<pre><code><span class="k">const</span> state = <span class="k">await</span> stub.<span class="f">getState</span>();
+<span class="c">// A newer run has taken over (or the run was reset) — abandon this chain.</span>
+<span class="k">if</span> (state.runId !== job.runId) <span class="k">return</span>;</code></pre>
+<p><span class="ref">worker/index.ts:<b>107–109</b></span> — the single most important line in the file.</p></li>
+
+<li><span class="st">Load the Webflow schema (cached)</span>
+<p><code>loadCollection</code> <span class="ref">worker/index.ts:<b>66–78</b></span> reads KV first, with a 300-second TTL <span class="ref">lib/kv.ts:<b>28</b></span>. Schemas rarely change and every page needs the field types.</p>
+<pre><code><span class="k">const</span> context: TransformContext = {
+  env, connection,
+  webflowFields: <span class="k">new</span> Map(collection.fields.<span class="f">map</span>(f =&gt; [f.slug, f])),
+  warnings: [],
+};</code></pre></li>
+
+<li><span class="st">Fetch 100 Airtable records</span>
+<pre><code><span class="k">const</span> page = <span class="k">await</span> airtable.<span class="f">listRecords</span>(baseId, tableId, {
+  viewId:   connection.airtable.viewId,
+  pageSize: 100,
+  offset:   job.offset,                                    <span class="c">// absent on page 0</span>
+  modifiedAfter: job.mode === <span class="s">"incremental"</span> ? state.cursor : undefined,
+});</code></pre>
+<p><span class="ref">worker/index.ts:<b>124–129</b></span></p></li>
+
+<li><span class="st">Hash every record</span>
+<p>This is the change-detection step, and it is deliberately cheap — no rendering, no network.</p>
+<div class="codehead"><span class="ref">lib/transform.ts:<b>37–48</b></span><span class="what">only <em>mapped</em> fields participate</span></div>
+<pre><code><span class="k">export function</span> <span class="f">hashInput</span>(connection, record) {
+  <span class="k">const</span> values = {};
+  <span class="k">for</span> (<span class="k">const</span> m <span class="k">of</span> connection.fields) {
+    values[m.webflowFieldSlug] = record.fields[m.airtableFieldId] ?? <span class="k">null</span>;
+  }
+  <span class="k">return</span> { name: …, slug: …, autoPublish: connection.autoPublish, values };
+}</code></pre>
+<div class="note why"><span class="tag">Consequence</span><p>Editing an <em>unmapped</em> Airtable column correctly counts as “no change” and triggers no Webflow write. Flipping <code>autoPublish</code> <em>is</em> in the hash, so toggling it re-writes every item — intentionally.</p></div>
+<p>Then <code>contentHash</code> <span class="ref">lib/hash.ts:<b>37</b></span> canonicalises before hashing — keys sorted, <code>undefined</code> collapsed, <code>1</code> and <code>1.0</code> identical — so cosmetic differences cannot fake a change.</p></li>
+
+<li><span class="st">Claim the batch — one atomic call</span>
+<pre><code><span class="k">const</span> claims = <span class="k">await</span> stub.<span class="f">claim</span>(job.runId, claimRequests);</code></pre>
+<p>All 100 records in a single round trip. The DO answers with one verdict each:</p>
+<p><span class="pill create">create</span> never seen &nbsp; <span class="pill update">update</span> hash differs, here is the item id &nbsp; <span class="pill skip">skip</span> hash identical</p></li>
+
+<li><span class="st">Write to Webflow — only for create/update</span>
+<pre><code><span class="k">if</span> (claim.action === <span class="s">"skip"</span>) {
+  results.<span class="f">push</span>({ recordId, hash, outcome: <span class="s">"skipped"</span> });
+  <span class="k">continue</span>;                                   <span class="c">// ← zero API calls</span>
+}
+
+<span class="k">const</span> fieldData = <span class="k">await</span> <span class="f">buildFieldData</span>(context, record);   <span class="c">// expensive; only now</span>
+
+<span class="k">if</span> (claim.action === <span class="s">"update"</span> &amp;&amp; claim.webflowItemId) {
+  <span class="k">try</span> {
+    item = <span class="k">await</span> webflow.<span class="f">updateItem</span>(collectionId, claim.webflowItemId, fieldData, autoPublish);
+  } <span class="k">catch</span> (error) {
+    <span class="c">// The item was deleted in Webflow behind our back. Recreate it</span>
+    <span class="c">// rather than failing the record forever.</span>
+    <span class="k">if</span> (error <span class="k">instanceof</span> ApiError &amp;&amp; error.status === 404) {
+      item = <span class="k">await</span> webflow.<span class="f">createItem</span>(…);  <span class="c">// + a warn log</span>
+    } <span class="k">else throw</span> error;
+  }
+} <span class="k">else</span> {
+  item = <span class="k">await</span> webflow.<span class="f">createItem</span>(…);
+}</code></pre>
+<p><span class="ref">worker/index.ts:<b>157–207</b></span> — note that <code>buildFieldData</code> runs <em>after</em> the skip check, so unchanged records never pay for markdown rendering or attachment uploads.</p></li>
+
+<li><span class="st">The failure-streak circuit breaker</span>
+<pre><code>failureStreak = message === lastFailure ? failureStreak + 1 : 1;
+lastFailure = message;
+
+<span class="k">if</span> (failureStreak &gt;= FATAL_FAILURE_STREAK) {          <span class="c">// 5</span>
+  <span class="c">// Preserve what did succeed before giving up.</span>
+  <span class="k">await</span> stub.<span class="f">commit</span>(job.runId, results);
+  <span class="k">await</span> stub.<span class="f">appendLogs</span>(logs);
+  <span class="k">throw new</span> <span class="f">FatalSyncError</span>(<span class="s">"Stopped after 5 identical failures…"</span>);
+}</code></pre>
+<p><span class="ref">worker/index.ts:<b>231–243</b></span>. Five <em>identical</em> consecutive errors means the problem is systemic — revoked token, deleted collection, plan limit — not one bad row. A different error resets the count to 1; any success resets it to 0.</p></li>
+
+<li><span class="st">Commit, log, enqueue the next link</span>
+<pre><code><span class="k">await</span> stub.<span class="f">commit</span>(job.runId, results);
+<span class="k">await</span> stub.<span class="f">appendLogs</span>(logs);
+
+<span class="k">if</span> (page.offset) {
+  <span class="k">await</span> env.SYNC_QUEUE.<span class="f">send</span>({ type: <span class="s">"sync.page"</span>, …, offset: page.offset, page: job.page + 1 });
+} <span class="k">else</span> {
+  <span class="k">await</span> env.SYNC_QUEUE.<span class="f">send</span>({ type: <span class="s">"sync.finalize"</span>, … });
+}</code></pre>
+<p><span class="ref">worker/index.ts:<b>247–271</b></span></p></li>
+</ol>
+</section>
+
+<!-- ============================================================ 7 -->
+<section id="ledger">
+<h2><span class="num">07</span>The ledger — <code>SyncConnection</code> Durable Object</h2>
+<p class="lede">One instance per connection. This is the piece KV cannot do.</p>
+
+<div class="note why"><span class="tag">Why a Durable Object at all</span>
+<p>Deciding whether a record needs writing is a <strong>read-modify-write</strong> against per-record state. With KV, two concurrent jobs could both read “no Webflow item exists yet” and each create one — a duplicate, permanently. A DO gives strongly consistent storage and single-threaded execution per connection, so <code>claim</code> is atomic by construction.</p></div>
+
+<h3>How the instance is addressed</h3>
+<div class="codehead"><span class="ref">worker/index.ts:<b>57–59</b></span></div>
+<pre><code><span class="k">function</span> <span class="f">stubFor</span>(env, connectionId) {
+  <span class="k">return</span> env.SYNC_DO.<span class="f">get</span>(env.SYNC_DO.<span class="f">idFromName</span>(connectionId));
+}</code></pre>
+<ul>
+<li><code>idFromName()</code> is a <strong>local hash</strong> — no network. The connection UUID always maps to the same 64-hex id.</li>
+<li><code>.get()</code> returns a <em>stub</em>. Nothing is instantiated until the first method call.</li>
+<li>Both Workers reach the <strong>same instance</strong>, because the dashboard's binding carries <code>"script_name": "syncwa-engine"</code> <span class="ref">wrangler.jsonc:<b>44–46</b></span>.</li>
+</ul>
+<p>To print an instance id: <code>this.ctx.id.toString()</code>; <code>this.ctx.id.name</code> gives the connection id back.</p>
+
+<h3>Storage layout</h3>
+<pre><code>at:{airtableRecordId}  →  LedgerEntry   <span class="c">// one per synced record</span>
+wf:{webflowItemId}     →  ReverseEntry  <span class="c">// reverse index, for webhooks</span>
+state                  →  RunState      <span class="c">// one key</span>
+logs                   →  SyncLogEntry[]<span class="c">// one key, newest first, capped at 200</span></code></pre>
+
+<div class="codehead"><span class="ref">lib/types.ts:<b>195–212</b></span></div>
+<pre><code><span class="k">interface</span> LedgerEntry {
+  webflowItemId: string;
+  hash:          string;      <span class="c">// whole-record hash — the cheap skip check</span>
+  base?:         FieldBase;   <span class="c">// per-field hashes — for three-way merge (§14)</span>
+  syncedAt:      string;
+  lastSeenRun:   string;      <span class="c">// drives orphan detection</span>
+}</code></pre>
+
+<h3><code>claim()</code> — the atomic bit</h3>
+<div class="codehead"><span class="ref">worker/sync-connection.ts:<b>208–245</b></span></div>
+<pre><code><span class="k">for</span> (<span class="k">const</span> item <span class="k">of</span> items) {
+  <span class="k">const</span> entry = <span class="k">await this</span>.ctx.storage.<span class="f">get</span>(`at:${item.recordId}`);
+
+  <span class="k">if</span> (!entry) { results.<span class="f">push</span>({ recordId, action: <span class="s">"create"</span> }); <span class="k">continue</span>; }
+
+  <span class="c">// Mark as still present in Airtable so the orphan sweep leaves it alone,</span>
+  <span class="c">// regardless of whether the content changed.</span>
+  touched.<span class="f">set</span>(key, { ...entry, lastSeenRun: runId });
+
+  results.<span class="f">push</span>({
+    recordId: item.recordId,
+    action: <span class="hl">entry.hash === item.hash ? <span class="s">"skip"</span> : <span class="s">"update"</span></span>,
+    webflowItemId: entry.webflowItemId,
+  });
+}</code></pre>
+<p>Two jobs cannot interleave here — the DO runs single-threaded per connection. That is the whole guarantee.</p>
+
+<h3><code>commit()</code> — recording the outcome</h3>
+<div class="codehead"><span class="ref">worker/sync-connection.ts:<b>248–287</b></span></div>
+<pre><code><span class="c">// Unchanged records were already counted by `claim` and carry no item id;</span>
+<span class="c">// they must not fall through into the failure branch below.</span>
+<span class="k">if</span> (result.outcome === <span class="s">"skipped"</span>) <span class="k">continue</span>;
+
+<span class="k">if</span> (result.outcome === <span class="s">"failed"</span> || !result.webflowItemId) {
+  state.counts.failed += 1; <span class="k">continue</span>;
+}
+
+writes[`at:${result.recordId}`]     = { webflowItemId, hash, base, syncedAt, lastSeenRun };
+writes[`wf:${result.webflowItemId}`] = { recordId: result.recordId };</code></pre>
+
+<h3>Run state</h3>
+<div class="tscroll"><table>
+<thead><tr><th>Field</th><th>Set by</th><th>Note</th></tr></thead>
+<tbody>
+<tr><td><code>status</code></td><td><code>beginRun</code> / <code>finishRun</code></td><td><code>idle</code> · <code>running</code> · <code>error</code></td></tr>
+<tr><td><code>runId</code></td><td><code>beginRun</code></td><td>Overwritten unconditionally — this <em>is</em> the takeover mechanism</td></tr>
+<tr><td><code>counts</code></td><td><code>claim</code> / <code>commit</code> / <code>forget</code></td><td>Reset to zero each run</td></tr>
+<tr><td><code>cursor</code></td><td><code>finishRun</code>, success only</td><td><strong>Carried forward</strong> by <code>beginRun</code> — see §10</td></tr>
+<tr><td><code>lastSuccessAt</code></td><td><code>finishRun</code>, success only</td><td>Drives the cron scheduler</td></tr>
+</tbody></table></div>
+
+<div class="note why"><span class="tag">The invariant in beginRun</span>
+<p><span class="ref">worker/sync-connection.ts:<b>148–151</b></span> — <em>“a run in flight has not earned a new cursor yet.”</em> If <code>beginRun</code> cleared the cursor and the run then failed, the next incremental sync would have nothing to compare against.</p></div>
+
+<h3>Logs are one key</h3>
+<div class="codehead"><span class="ref">worker/sync-connection.ts:<b>365–372</b></span></div>
+<pre><code><span class="k">const</span> merged = [...entries.<span class="f">reverse</span>(), ...existing].<span class="f">slice</span>(0, MAX_LOGS);  <span class="c">// 200</span>
+<span class="k">await this</span>.ctx.storage.<span class="f">put</span>(LOGS_KEY, merged);
+<span class="k">await this</span>.<span class="f">broadcast</span>();   <span class="c">// pushes to any attached dashboard</span></code></pre>
+<p>Newest-first, self-truncating, no cleanup job. One read serves the whole Activity panel.</p>
+</section>
+
+<!-- ============================================================ 8 -->
+<section id="transform">
+<h2><span class="num">08</span>Transform — Airtable value → Webflow <code>fieldData</code></h2>
+<p class="lede">Two functions with deliberately different costs.</p>
+
+<div class="tscroll"><table>
+<thead><tr><th></th><th>Runs for</th><th>Cost</th></tr></thead>
+<tbody>
+<tr><td><code>hashInput</code></td><td><strong>every</strong> record, every pass</td><td>Raw values only. No rendering, no network.</td></tr>
+<tr><td><code>buildFieldData</code></td><td>only records the ledger says changed</td><td>Markdown rendering, R2 uploads, option lookups.</td></tr>
+</tbody></table></div>
+
+<h3>Type-by-type conversion</h3>
+<div class="codehead"><span class="ref">lib/transform.ts:<b>62–134</b></span></div>
+<div class="tscroll"><table>
+<thead><tr><th>Webflow type</th><th>What happens</th></tr></thead>
+<tbody>
+<tr><td><code>PlainText</code> <code>Color</code> <code>Email</code> <code>Phone</code> <code>Link</code></td><td><code>toPlainText(value) || null</code></td></tr>
+<tr><td><code>RichText</code></td><td>Airtable long-text is markdown → <code>marked.parse()</code> → HTML</td></tr>
+<tr><td><code>Number</code></td><td><code>toNumber</code> — handles strings and single-element arrays</td></tr>
+<tr><td><code>Switch</code></td><td><code>Boolean(value)</code></td></tr>
+<tr><td><code>DateTime</code></td><td><code>toDateTime</code> → ISO string, or <code>null</code> if unparseable</td></tr>
+<tr><td><code>Option</code></td><td>Match by <em>normalised name</em> against the collection's option list. No match → warn + leave unset.</td></tr>
+<tr><td><code>Image</code> <code>File</code></td><td>First attachment → <code>rehostAttachment</code> → <code>{ url }</code></td></tr>
+<tr><td><code>MultiImage</code></td><td>All attachments, rehosted in parallel</td></tr>
+</tbody></table></div>
+
+<div class="note why"><span class="tag">null vs undefined</span>
+<div class="codehead" style="margin-top:.4rem"><span class="ref">lib/transform.ts:<b>169–170</b></span></div>
+<pre style="margin:.4rem 0 0"><code><span class="c">// `undefined` means "leave this field alone"; `null` means "clear it".</span>
+<span class="k">if</span> (coerced !== undefined) fieldData[m.webflowFieldSlug] = coerced;</code></pre>
+<p style="margin-top:.5rem">This is why an unmatched select option does not wipe the existing Webflow value — <code>coerce</code> returns <code>undefined</code>, and the key is simply omitted from the payload.</p></div>
+
+<h3>Unknown option values warn, they do not fail</h3>
+<pre><code><span class="k">if</span> (!match) {
+  <span class="c">// Webflow will not create option values on the fly. Skipping the single</span>
+  <span class="c">// field is far better than failing the whole item.</span>
+  context.warnings.<span class="f">push</span>(`Record ${recordId}: option "${wanted}" does not exist…`);
+  <span class="k">return</span> undefined;
+}</code></pre>
+<p><span class="ref">lib/transform.ts:<b>102–109</b></span>. Warnings are drained into the run log at <span class="ref">worker/index.ts:<b>250–252</b></span>.</p>
+
+<h3>Name and slug</h3>
+<pre><code><span class="k">const</span> name = <span class="f">toPlainText</span>(record.fields[connection.nameSource]).<span class="f">trim</span>() || `Untitled ${record.id}`;
+fieldData.slug = <span class="f">slugForRecord</span>(slugSource, record.id);</code></pre>
+<p><code>slugForRecord</code> <span class="ref">lib/slug.ts:<b>23–27</b></span> appends the last 6 characters of the record id, so two records named “About” never collide and the slug stays stable across syncs.</p>
+
+<h3>Attachments go to R2, not to Webflow</h3>
+<p><span class="ref">lib/media.ts:<b>34–68</b></span>. The R2 key is derived from the <em>Airtable attachment id</em>, which is stable — so a re-sync <code>head()</code>s the object and reuses it rather than re-downloading. Objects are stored <code>immutable</code> with a one-year cache.</p>
+<div class="note warn"><span class="tag">Fails loudly on purpose</span><p>If <code>MEDIA_PUBLIC_URL</code> is unset, <code>rehostAttachment</code> throws. Silently emitting an expiring Airtable URL would produce images that work today and break tomorrow.</p></div>
+</section>
+
+<!-- ============================================================ 9 -->
+<section id="finalize">
+<h2><span class="num">09</span>Finalize &amp; orphan cleanup</h2>
+<p class="lede">An orphan is a ledger entry this run never saw in Airtable — i.e. the record was deleted upstream.</p>
+
+<div class="codehead"><span class="ref">worker/index.ts:<b>283–286</b></span><span class="what">the guard that prevents catastrophe</span></div>
+<pre><code><span class="c">// Orphan detection compares "seen by this run" against the whole ledger, so</span>
+<span class="c">// it is only sound after a full pass. An incremental run sees a subset by</span>
+<span class="c">// design and would wrongly archive everything it skipped.</span>
+<span class="k">if</span> (connection &amp;&amp; job.mode === <span class="s">"full"</span> &amp;&amp; connection.deleteBehavior !== <span class="s">"ignore"</span>) {</code></pre>
+
+<div class="note gap"><span class="tag">Read this twice</span>
+<p>Without <code>job.mode === "full"</code>, an incremental run — which deliberately looks at only recently-modified records — would treat <strong>every record it did not fetch</strong> as deleted and archive the entire collection.</p></div>
+
+<h3>How orphans are found</h3>
+<p><code>listOrphans</code> <span class="ref">worker/sync-connection.ts:<b>298–322</b></span> walks the <code>at:</code> prefix and returns entries where <code>lastSeenRun !== runId</code>. Remember that <code>claim()</code> stamps <code>lastSeenRun</code> on <em>every</em> record it sees — changed or not — which is exactly what makes this work.</p>
+
+<h3>The cleanup loop</h3>
+<pre><code><span class="k">for</span> (;;) {
+  <span class="k">const</span> orphans = <span class="k">await</span> stub.<span class="f">listOrphans</span>(job.runId, ORPHAN_BATCH);   <span class="c">// 100</span>
+  <span class="k">if</span> (orphans.length === 0) <span class="k">break</span>;
+
+  <span class="k">const</span> removed = [];
+  <span class="k">for</span> (<span class="k">const</span> orphan <span class="k">of</span> orphans) {
+    <span class="k">try</span> {
+      connection.deleteBehavior === <span class="s">"delete"</span>
+        ? <span class="k">await</span> webflow.<span class="f">deleteItem</span>(collectionId, orphan.webflowItemId)
+        : <span class="k">await</span> webflow.<span class="f">archiveItem</span>(collectionId, orphan.webflowItemId);
+      removed.<span class="f">push</span>(orphan.recordId);
+    } <span class="k">catch</span> (error) { logs.<span class="f">push</span>({ level: <span class="s">"error"</span>, … }); }
+  }
+
+  <span class="c">// Only forget records we actually dealt with, so failures are retried</span>
+  <span class="c">// by the next full run instead of being silently dropped.</span>
+  <span class="k">await</span> stub.<span class="f">forget</span>(removed);
+  <span class="k">if</span> (removed.length === 0) <span class="k">break</span>;      <span class="c">// ← prevents an infinite loop</span>
+}</code></pre>
+<p><span class="ref">worker/index.ts:<b>292–322</b></span></p>
+
+<h3>Delete behaviours</h3>
+<div class="tscroll"><table>
+<thead><tr><th>Setting</th><th>Effect</th><th>Reversible?</th></tr></thead>
+<tbody>
+<tr><td><code>archive</code> <em>(default)</em></td><td><code>PATCH isArchived: true</code> — off the live site, still in Webflow</td><td>Yes</td></tr>
+<tr><td><code>ignore</code></td><td>Webflow item left completely alone</td><td>n/a</td></tr>
+<tr><td><code>delete</code></td><td><code>DELETE</code> — gone</td><td><strong>No</strong></td></tr>
+</tbody></table></div>
+
+<h3>Closing the run</h3>
+<div class="codehead"><span class="ref">worker/sync-connection.ts:<b>167–197</b></span></div>
+<pre><code>state.status = error ? <span class="s">"error"</span> : <span class="s">"idle"</span>;
+<span class="k">if</span> (!error) {
+  state.lastSuccessAt = finishedAt;
+  <span class="c">// Rewind the cursor slightly so an edit made during the run is not missed.</span>
+  state.cursor = <span class="k">new</span> Date(startedAt - CURSOR_OVERLAP_MS).<span class="f">toISOString</span>();
+}</code></pre>
+</section>
+
+<!-- ============================================================ 10 -->
+<section id="cursor">
+<h2><span class="num">10</span>Incremental mode &amp; the cursor</h2>
+
+<div class="diagram">
+  <div class="stack">
+    <div class="node"><span class="t">run starts at 10:00:00</span></div>
+    <div class="vline"></div><span class="vlabel">…pages run for ~4 minutes…</span><div class="vline"></div>
+    <div class="node ok"><span class="t">finishRun at 10:04:12</span><span class="d">success</span></div>
+    <div class="vline"></div><span class="vlabel">cursor = startedAt − 60s</span><div class="vline"></div>
+    <div class="node do"><span class="t">cursor = 09:59:00</span><span class="d">not 10:04:12</span></div>
+  </div>
+  <p class="cap">The cursor is anchored to when the run <em>started</em>, minus a 60-second overlap.</p>
+</div>
+
+<h3>Why minus 60 seconds</h3>
+<p>Two hazards, one fix <span class="ref">worker/sync-connection.ts:<b>41–45</b></span>:</p>
+<ul>
+<li><strong>Clock skew</strong> between Cloudflare and Airtable.</li>
+<li><strong>Edits made mid-run.</strong> A record edited at 10:02 while page 3 was processing might already have been read at 10:01. Anchoring to <em>start</em> minus overlap guarantees the next run re-examines it.</li>
+</ul>
+<p>Re-examining is cheap: the hash will match if nothing really changed, so it costs a <span class="pill skip">skip</span>, not a write. <strong>Over-fetching is safe; under-fetching loses data.</strong></p>
+
+<h3>The Airtable filter</h3>
+<div class="codehead"><span class="ref">lib/airtable.ts:<b>136–149</b></span></div>
+<pre><code><span class="c">// LAST_MODIFIED_TIME() with no arguments tracks every field on the record,</span>
+<span class="c">// so an incremental run needs no dedicated "last modified" column.</span>
+<span class="c">//</span>
+<span class="c">// CREATED_TIME() is OR'd in because Airtable returns BLANK for</span>
+<span class="c">// LAST_MODIFIED_TIME() on records that were created and never edited</span>
+<span class="c">// afterwards — a bulk paste or import. Without this, freshly added rows</span>
+<span class="c">// would be invisible to every incremental run.</span>
+url.searchParams.<span class="f">set</span>(<span class="s">"filterByFormula"</span>,
+  `OR(IS_AFTER(LAST_MODIFIED_TIME(), '${modifiedAfter}'), ` +
+  `IS_AFTER(CREATED_TIME(), '${modifiedAfter}'))`);</code></pre>
+<div class="note ok"><span class="tag">Hard-won detail</span><p>That <code>OR(…CREATED_TIME…)</code> is not defensive padding. Without it, records added by import would never sync — the single most likely “why is my row missing” bug in the whole system.</p></div>
+
+<h3>The cron scheduler</h3>
+<div class="codehead"><span class="ref">worker/index.ts:<b>414–443</b></span><span class="what">runs every 5 minutes</span></div>
+<pre><code><span class="k">for</span> (<span class="k">const</span> connection <span class="k">of</span> connections) {
+  <span class="k">if</span> (connection.paused || !connection.schedule.enabled) <span class="k">continue</span>;
+
+  <span class="k">if</span> (state.status === <span class="s">"running"</span>) {
+    <span class="k">if</span> (now - startedAt &lt; STUCK_RUN_MS) <span class="k">continue</span>;      <span class="c">// 30 min</span>
+  }
+  <span class="k">if</span> (lastSuccess &amp;&amp; now - lastSuccess &lt; intervalMs) <span class="k">continue</span>;
+
+  <span class="c">// Without a cursor there is nothing to be incremental against, so the</span>
+  <span class="c">// first scheduled run is a full pass.</span>
+  <span class="k">const</span> mode = state.cursor ? <span class="s">"incremental"</span> : <span class="s">"full"</span>;
+  <span class="k">await</span> env.SYNC_QUEUE.<span class="f">send</span>({ type: <span class="s">"sync.start"</span>, connectionId, runId: crypto.<span class="f">randomUUID</span>(), mode });
+}</code></pre>
+<div class="note warn"><span class="tag">Duplicated constant</span><p><code>STUCK_RUN_MS</code> is defined twice — <span class="ref">worker/index.ts:<b>41</b></span> and <span class="ref">api/connections/[id]/sync:<b>10</b></span> — because the two Workers share no module. If one drifts, cron will take over runs the UI still refuses to.</p></div>
+</section>
+
+<!-- ============================================================ 11 -->
+<section id="live">
+<h2><span class="num">11</span>Live status — WebSocket on the Durable Object</h2>
+<p class="lede">The dashboard used to poll every 4 seconds. It now holds a hibernatable WebSocket, with polling kept only as a fallback.</p>
+
+<div class="diagram">
+  <div class="chain">
+    <div class="node"><span class="t">browser</span><span class="d">connection page</span></div>
+    <div class="arrow">→</div>
+    <div class="node cf"><span class="t">POST<br>stream-ticket</span><span class="d">syncwa-web<br>signs HMAC</span></div>
+    <div class="arrow">→</div>
+    <div class="node cf"><span class="t">GET /ws?t=…</span><span class="d">syncwa-engine<br>verifies</span></div>
+    <div class="arrow">→</div>
+    <div class="node do"><span class="t">DO.fetch()</span><span class="d">101 Upgrade<br>+ snapshot</span></div>
+  </div>
+  <p class="cap">The ticket is valid for 60 seconds and scoped to one connection id.</p>
+</div>
+
+<h3>Why a ticket</h3>
+<p><span class="ref">lib/ticket.ts:<b>1–12</b></span> — the socket is served by the engine, which sits on a different origin from the dashboard. Rather than expose it openly, the dashboard mints an HMAC-signed ticket using <code>ENCRYPTION_KEY</code>, which both Workers already share. <strong>Practical effect: whatever protects <code>syncwa-web</code> protects the stream.</strong></p>
+
+<h3>The engine side</h3>
+<div class="codehead"><span class="ref">worker/index.ts:<b>351–374</b></span></div>
+<pre><code><span class="k">if</span> (url.pathname !== <span class="s">"/ws"</span>) <span class="k">return new</span> <span class="f">Response</span>(<span class="s">"syncwa-engine: queue consumer…"</span>);
+
+<span class="c">// WebSocket upgrades are not subject to CORS preflight, so the Origin</span>
+<span class="c">// check has to happen here or any page could open this stream.</span>
+<span class="k">if</span> (allowedOrigin &amp;&amp; request.headers.<span class="f">get</span>(<span class="s">"origin"</span>) !== allowedOrigin) {
+  <span class="k">return new</span> <span class="f">Response</span>(<span class="s">"Origin not allowed."</span>, { status: 403 });
+}
+
+<span class="k">const</span> claims = ticket ? <span class="k">await</span> <span class="f">verifyTicket</span>(env.ENCRYPTION_KEY, ticket) : <span class="k">null</span>;
+<span class="k">if</span> (!claims) <span class="k">return new</span> <span class="f">Response</span>(<span class="s">"Invalid or expired ticket."</span>, { status: 401 });
+
+<span class="k">return</span> <span class="f">stubFor</span>(env, claims.c).<span class="f">fetch</span>(request);</code></pre>
+
+<h3>Hibernation is the point</h3>
+<div class="codehead"><span class="ref">worker/sync-connection.ts:<b>69–90</b></span></div>
+<pre><code><span class="c">/**
+ * `acceptWebSocket` rather than `server.accept()` opts into hibernation: the
+ * Durable Object can be evicted from memory while the socket stays open, and
+ * is only woken when there is something to deliver. An idle dashboard tab
+ * therefore costs nothing, which is the whole point of dropping the poll.
+ */</span>
+<span class="k">this</span>.ctx.<span class="f">acceptWebSocket</span>(server);
+<span class="c">// Send a snapshot immediately so the UI paints without waiting for a change.</span>
+server.<span class="f">send</span>(<span class="f">JSON.stringify</span>(<span class="k">await this</span>.<span class="f">snapshot</span>()));</code></pre>
+
+<h3>What triggers a push</h3>
+<p><code>broadcast()</code> is called at the end of <code>claim</code>, <code>commit</code>, <code>forget</code>, <code>appendLogs</code> and <code>reset</code>. Since <code>beginRun</code> and <code>finishRun</code> both log, run start and finish are covered too.</p>
+
+<h3>The browser side</h3>
+<p><span class="ref">app/connections/[id]/page.tsx:<b>75–140</b></span></p>
+<ul>
+<li><strong>Heartbeat:</strong> client sends <code>"ping"</code> every 30s; the DO replies <code>"pong"</code> <span class="ref">sync-connection.ts:<b>115–119</b></span>. Stops intermediaries idling the connection out.</li>
+<li><strong>Reconnect:</strong> 3s after a close, 5s after a ticket failure.</li>
+<li><strong>Fallback:</strong> a 5-second poll of <code>/logs?limit=40</code> that runs <em>only</em> while <code>live === false</code>, and stops the moment the socket returns.</li>
+<li><strong>Read-only:</strong> the DO accepts nothing but <code>"ping"</code>.</li>
+</ul>
+<div class="note ok"><span class="tag">Nice detail</span><p>The poll requests <code>limit=40</code> to match <code>STREAM_LOG_LIMIT</code> <span class="ref">sync-connection.ts:<b>38</b></span>, so the Activity list does not visibly change length when the transport switches.</p></div>
+
+<h3>Required environment</h3>
+<div class="tscroll"><table>
+<thead><tr><th>Var</th><th>Set on</th><th>Purpose</th></tr></thead>
+<tbody>
+<tr><td><code>ENGINE_ORIGIN</code></td><td>syncwa-web</td><td>Where to point the socket. Unset → 500 from stream-ticket.</td></tr>
+<tr><td><code>ALLOWED_ORIGIN</code></td><td>syncwa-engine</td><td>Origin allowlist. Empty disables the check (local dev).</td></tr>
+<tr><td><code>ENCRYPTION_KEY</code></td><td>both</td><td>Shared secret for token encryption <em>and</em> ticket HMAC.</td></tr>
+</tbody></table></div>
+</section>
+
+<!-- ============================================================ 12 -->
+<section id="errors">
+<h2><span class="num">12</span>Errors &amp; retries</h2>
+
+<h3>Three layers</h3>
+<div class="tscroll"><table>
+<thead><tr><th>Layer</th><th>Where</th><th>Behaviour</th></tr></thead>
+<tbody>
+<tr><td>HTTP</td><td><span class="ref">lib/http.ts:<b>84–116</b></span></td><td>4 attempts, honours <code>Retry-After</code>, else <code>2^n</code> s + jitter, capped 30s. Retries 429 and 5xx only.</td></tr>
+<tr><td>Record</td><td><span class="ref">worker/index.ts:<b>219–244</b></span></td><td>One bad row is logged and the loop continues — unless 5 identical errors in a row.</td></tr>
+<tr><td>Job</td><td><span class="ref">worker/index.ts:<b>376–405</b></span></td><td>5 attempts, <code>2^n × 5</code> s capped at 300s, then close the run with the error.</td></tr>
+</tbody></table></div>
+
+<h3>The retry decision</h3>
+<pre><code><span class="k">const</span> retryable =
+  error <span class="k">instanceof</span> FatalSyncError ? <span class="k">false</span>
+  : error <span class="k">instanceof</span> ApiError    ? error.retryable
+  : <span class="k">true</span>;                        <span class="c">// unknown → assume transient</span>
+
+<span class="k">if</span> (retryable &amp;&amp; message.attempts &lt; 5) {
+  message.<span class="f">retry</span>({ delaySeconds: Math.<span class="f">min</span>(300, 2 ** message.attempts * 5) });
+  <span class="k">continue</span>;
+}
+
+<span class="c">// Out of retries, or a permanent failure. Close the run out with the</span>
+<span class="c">// error so the dashboard shows why instead of a run stuck at "running".</span>
+<span class="k">await</span> <span class="f">stubFor</span>(env, body.connectionId).<span class="f">finishRun</span>(body.runId, <span class="f">errorMessage</span>(error));
+message.<span class="f">ack</span>();</code></pre>
+
+<div class="note why"><span class="tag">Why every path ends in ack()</span>
+<p>Recording the failure on the run is more useful than parking a message in a queue nobody watches. The handler's own ceiling (attempt 5) is reached <em>before</em> the platform's <code>max_retries</code>, so the normal failure path never produces a dead letter.</p></div>
+
+<h3>Error messages carry the upstream body</h3>
+<pre><code><span class="k">function</span> <span class="f">errorMessage</span>(error) {
+  <span class="k">if</span> (error <span class="k">instanceof</span> ApiError) <span class="k">return</span> `${error.message}${error.body ? ` — ${error.body}` : <span class="s">""</span>}`;
+  <span class="k">return</span> error <span class="k">instanceof</span> Error ? error.message : <span class="f">String</span>(error);
+}</code></pre>
+<p>And <code>describeApiError</code> <span class="ref">lib/http.ts:<b>29–52</b></span> unwraps Airtable's and Webflow's structured JSON errors. A canned “check your scopes” string would send you hunting the wrong problem.</p>
+
+<h3>Self-healing behaviours</h3>
+<div class="tscroll"><table>
+<thead><tr><th>Situation</th><th>What happens</th><th>Where</th></tr></thead>
+<tbody>
+<tr><td>Webflow item deleted behind our back</td><td>404 on update → recreate + warn log</td><td><span class="ref">index.ts:<b>181–195</b></span></td></tr>
+<tr><td>Orphan removal fails</td><td>Not forgotten; retried next full run</td><td><span class="ref">index.ts:<b>318–320</b></span></td></tr>
+<tr><td>Run abandoned mid-chain</td><td>30-min threshold lets a new run take over</td><td><span class="ref">index.ts:<b>424–427</b></span></td></tr>
+<tr><td>Unknown select option</td><td>Field omitted, warning logged, item still written</td><td><span class="ref">transform.ts:<b>102–109</b></span></td></tr>
+<tr><td>Attachment already in R2</td><td><code>head()</code> hit → no re-download</td><td><span class="ref">media.ts:<b>49–51</b></span></td></tr>
+</tbody></table></div>
+</section>
+
+<!-- ============================================================ 13 -->
+<section id="limits">
+<h2><span class="num">13</span>Rate limits</h2>
+
+<div class="tscroll"><table>
+<thead><tr><th>API</th><th>Their limit</th><th>Our pace</th><th>Set at</th></tr></thead>
+<tbody>
+<tr><td>Airtable</td><td>~5 req/sec per base</td><td>220 ms gap ≈ 4.5/s</td><td><span class="ref">lib/airtable.ts:<b>91</b></span></td></tr>
+<tr><td>Webflow</td><td>60 req/min</td><td>1100 ms gap ≈ 54/min</td><td><span class="ref">lib/webflow.ts:<b>72</b></span></td></tr>
+</tbody></table></div>
+
+<div class="codehead"><span class="ref">lib/http.ts:<b>55–67</b></span></div>
+<pre><code><span class="k">export class</span> Pacer {
+  <span class="k">private</span> last = 0;
+  <span class="k">constructor</span>(<span class="k">private readonly</span> minIntervalMs: number) {}
+
+  <span class="k">async</span> <span class="f">wait</span>() {
+    <span class="k">const</span> elapsed = Date.<span class="f">now</span>() - <span class="k">this</span>.last;
+    <span class="k">if</span> (elapsed &lt; <span class="k">this</span>.minIntervalMs) <span class="k">await</span> <span class="f">sleep</span>(<span class="k">this</span>.minIntervalMs - elapsed);
+    <span class="k">this</span>.last = Date.<span class="f">now</span>();
+  }
+}</code></pre>
+
+<div class="note warn"><span class="tag">The Pacer is per-client-instance</span>
+<p>A new <code>WebflowClient</code> is constructed in every <code>handlePage</code> invocation, so its <code>last</code> timestamp resets each job. What actually keeps the global rate safe is <code>max_concurrency: 1</code> on the queue — only one job runs at a time. If you ever raise that, the pacing guarantee disappears with it.</p></div>
+
+<h4>Rough throughput</h4>
+<p>Webflow is the bottleneck at ~54 writes/minute. A first full sync of 1,000 new records takes roughly <strong>18–20 minutes</strong>. The second run over the same unchanged table takes seconds — every record resolves to <span class="pill skip">skip</span> and makes no Webflow call at all.</p>
+</section>
+
+<!-- ============================================================ 14 -->
+<section id="twoway">
+<h2><span class="num">14</span>Two-way sync groundwork</h2>
+<p class="lede">Real code exists for this and it runs on every page — but nothing consumes it yet. Design notes live in <code>docs/two-way-sync.md</code>.</p>
+
+<h3>What is already wired</h3>
+<div class="tscroll"><table>
+<thead><tr><th>Piece</th><th>Where</th><th>Status</th></tr></thead>
+<tbody>
+<tr><td>Per-field <code>base</code> computed each page</td><td><span class="ref">worker/index.ts:<b>145</b></span></td><td><strong>Running now</strong></td></tr>
+<tr><td><code>base</code> persisted in the ledger</td><td><span class="ref">sync-connection.ts:<b>263–270</b></span></td><td><strong>Running now</strong></td></tr>
+<tr><td>Reverse index <code>wf:{itemId}</code></td><td><span class="ref">sync-connection.ts:<b>271</b></span></td><td><strong>Running now</strong></td></tr>
+<tr><td><code>lookupByItemId()</code></td><td><span class="ref">sync-connection.ts:<b>325–330</b></span></td><td>Ready, uncalled</td></tr>
+<tr><td><code>diffField()</code> three-way merge</td><td><span class="ref">lib/compare.ts:<b>178–201</b></span></td><td>Ready, uncalled</td></tr>
+<tr><td><code>recordIdFieldSlug</code> written to Webflow</td><td><span class="ref">transform.ts:<b>158–160</b></span></td><td><strong>Running now</strong></td></tr>
+<tr><td>Webflow webhook receiver</td><td>—</td><td><strong>Not built</strong></td></tr>
+</tbody></table></div>
+
+<h3>The three-way merge idea</h3>
+<div class="diagram">
+  <div class="chain">
+    <div class="node at"><span class="t">Airtable now</span></div>
+    <div class="arrow">↘</div>
+    <div class="node do"><span class="t">base</span><span class="d">last agreed state</span></div>
+    <div class="arrow">↙</div>
+    <div class="node wf"><span class="t">Webflow now</span></div>
+  </div>
+  <p class="cap">Compare each side against <em>base</em>, not against each other.</p>
+</div>
+
+<div class="tscroll"><table>
+<thead><tr><th>Airtable vs base</th><th>Webflow vs base</th><th>Verdict</th></tr></thead>
+<tbody>
+<tr><td>same</td><td>same</td><td><code>unchanged</code></td></tr>
+<tr><td><strong>differs</strong></td><td>same</td><td><code>airtable</code> — push to Webflow</td></tr>
+<tr><td>same</td><td><strong>differs</strong></td><td><code>webflow</code> — a real user edit</td></tr>
+<tr><td><strong>differs</strong></td><td><strong>differs</strong>, same value</td><td><code>unchanged</code> — they agree</td></tr>
+<tr><td><strong>differs</strong></td><td><strong>differs</strong>, other value</td><td><code>conflict</code></td></tr>
+</tbody></table></div>
+
+<div class="note why"><span class="tag">Why this replaced echo suppression</span>
+<div class="codehead" style="margin-top:.4rem"><span class="ref">lib/kv.ts:<b>89–95</b></span></div>
+<pre style="margin:.4rem 0 0"><code><span class="c">/*
+ * Echo suppression used to live here as a `suppress:{conn}:{item}` marker with
+ * a 60-second TTL. It is gone: KV writes take up to 60 seconds to propagate,
+ * so the marker could be invisible at exactly the moment it was needed. Echo
+ * detection is now the per-field base in the ledger, where an echo equals base
+ * and is therefore not a change at all.
+ */</span></pre>
+<p style="margin-top:.5rem">A timing hack was replaced by a correctness property. An echo of our own write <em>equals the base by definition</em>, so it cannot register as a change no matter how the timing falls.</p></div>
+
+<h3>Field classes</h3>
+<p><span class="ref">lib/compare.ts:<b>25–35</b></span></p>
+<ul>
+<li><strong>Bidirectional</strong> — <code>PlainText, Email, Phone, Link, Number, Switch, DateTime, Option, Color</code>. These canonicalise identically from both sides, so a Webflow edit is detectable.</li>
+<li><strong>Airtable-owned (push-only)</strong> — <code>RichText, Image, MultiImage, File</code>. Markdown becomes HTML and attachments become R2 URLs; there is no way to compare back. Their base tracks only the Airtable side, so an Airtable edit is still detected but a Webflow edit is never mistaken for one.</li>
+</ul>
+<p>The <code>Option</code> case is the clearest illustration: Airtable gives a choice <em>name</em>, Webflow stores an option <em>id</em>. <code>canonicalFromWebflow</code> <span class="ref">compare.ts:<b>84–90</b></span> resolves the id back to its name and normalises both, so “unchanged” genuinely means unchanged.</p>
+
+<div class="note ok"><span class="tag">Backwards compatible by design</span>
+<p><code>base</code> is optional on <code>LedgerEntry</code> <span class="ref">types.ts:<b>199–203</b></span>: <em>“Absent on entries written before ledger v2. Treated as unknown, which makes the next successful write populate it. No migration job needed.”</em> And <code>diffField</code> treats a missing base as “never synced”, not as disagreement.</p></div>
+</section>
+
+<!-- ============================================================ 15 -->
+<section id="lookup">
+<h2><span class="num">15</span>“Where do I look?”</h2>
+<p class="lede">Symptom or question on the left, file and line on the right.</p>
+
+<h3>Behaviour</h3>
+<div class="tscroll"><table>
+<thead><tr><th>Question</th><th>Open this</th></tr></thead>
+<tbody>
+<tr><td>Why was this record skipped?</td><td><span class="ref">transform.ts:<b>37</b></span> <code>hashInput</code> + <span class="ref">sync-connection.ts:<b>227</b></span> the hash comparison</td></tr>
+<tr><td>Why did it create a duplicate?</td><td><span class="ref">sync-connection.ts:<b>216</b></span> — no ledger entry means <code>create</code>. Usually the ledger was reset.</td></tr>
+<tr><td>Why is my Webflow field empty?</td><td><span class="ref">transform.ts:<b>62–134</b></span> <code>coerce</code>; <span class="ref">transform.ts:<b>169</b></span> for the <code>undefined</code> skip</td></tr>
+<tr><td>Why did items get archived?</td><td><span class="ref">index.ts:<b>286</b></span> orphan guard + <span class="ref">sync-connection.ts:<b>312</b></span> <code>lastSeenRun</code></td></tr>
+<tr><td>Why didn't my new rows sync?</td><td><span class="ref">airtable.ts:<b>136–149</b></span> — the <code>CREATED_TIME()</code> clause</td></tr>
+<tr><td>Why is the slug like that?</td><td><span class="ref">slug.ts:<b>23–27</b></span></td></tr>
+<tr><td>Why is the image URL an r2.dev link?</td><td><span class="ref">media.ts:<b>34–68</b></span></td></tr>
+<tr><td>Why did the run stop early?</td><td><span class="ref">index.ts:<b>234–243</b></span> <code>FATAL_FAILURE_STREAK</code></td></tr>
+<tr><td>Why did clicking Sync do nothing?</td><td><span class="ref">index.ts:<b>87</b></span> — paused connections return silently</td></tr>
+<tr><td>Why is it stuck on “running”?</td><td><span class="ref">index.ts:<b>41</b></span> + <span class="ref">sync/route.ts:<b>26–39</b></span> — 30-minute threshold</td></tr>
+</tbody></table></div>
+
+<h3>Configuration</h3>
+<div class="tscroll"><table>
+<thead><tr><th>Knob</th><th>Value</th><th>Where</th></tr></thead>
+<tbody>
+<tr><td>Records per page</td><td>100</td><td><span class="ref">index.ts:<b>38</b></span></td></tr>
+<tr><td>Orphans per batch</td><td>100</td><td><span class="ref">index.ts:<b>39</b></span></td></tr>
+<tr><td>Stuck-run threshold</td><td>30 min</td><td><span class="ref">index.ts:<b>41</b></span> <em>and</em> <span class="ref">sync/route.ts:<b>10</b></span></td></tr>
+<tr><td>Fatal failure streak</td><td>5</td><td><span class="ref">index.ts:<b>47</b></span></td></tr>
+<tr><td>Log cap</td><td>200</td><td><span class="ref">sync-connection.ts:<b>36</b></span></td></tr>
+<tr><td>Logs per socket push</td><td>40</td><td><span class="ref">sync-connection.ts:<b>38</b></span></td></tr>
+<tr><td>Cursor overlap</td><td>60 s</td><td><span class="ref">sync-connection.ts:<b>45</b></span></td></tr>
+<tr><td>Schema cache TTL</td><td>300 s</td><td><span class="ref">kv.ts:<b>28</b></span></td></tr>
+<tr><td>Ticket TTL</td><td>60 s</td><td><span class="ref">ticket.ts:<b>14</b></span></td></tr>
+<tr><td>Cron interval</td><td>*/5 * * * *</td><td><span class="ref">worker/wrangler.jsonc:<b>64</b></span></td></tr>
+</tbody></table></div>
+
+<h3>Commands</h3>
+<pre><code>npm run dev            <span class="c"># dashboard (Next.js)</span>
+npm run dev:engine     <span class="c"># engine worker, separate terminal</span>
+npm run test           <span class="c"># tests/merge.test.ts</span>
+npm run typecheck
+npm run deploy         <span class="c"># engine first, then web</span>
+
+npx wrangler tail syncwa-engine        <span class="c"># live logs</span></code></pre>
+
+<div class="note"><span class="tag">Inspecting a DO instance</span>
+<p>There is no wrangler command to read Durable Object storage, and the dashboard shows instances but not contents. To see the ledger you need a method on the DO that calls <code>ctx.storage.list({ prefix: "at:", limit })</code>, exposed through a route. Locally, the SQLite file appears under <code>worker/.wrangler/state/v3/do/</code> after the first run.</p></div>
+</section>
+
+<!-- ============================================================ 16 -->
+<section id="glossary">
+<h2><span class="num">16</span>Glossary</h2>
+<div class="tscroll"><table>
+<thead><tr><th>Term</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td><strong>Connection</strong></td><td>One Airtable table → one Webflow collection, with field mappings. Stored in KV as <code>conn:{uuid}</code>.</td></tr>
+<tr><td><strong>Run</strong></td><td>One end-to-end sync attempt, identified by a <code>runId</code> UUID minted when the job is enqueued.</td></tr>
+<tr><td><strong>Ledger</strong></td><td>The DO's per-record memory: which Airtable record maps to which Webflow item, and the hash of what was last written.</td></tr>
+<tr><td><strong>Claim</strong></td><td>The atomic “what does this record need?” call. Returns create / update / skip.</td></tr>
+<tr><td><strong>Commit</strong></td><td>Recording the outcome of Webflow writes back into the ledger.</td></tr>
+<tr><td><strong>Orphan</strong></td><td>A ledger entry a full run did not see in Airtable — deleted upstream.</td></tr>
+<tr><td><strong>Cursor</strong></td><td>ISO timestamp; incremental runs ask Airtable only for records modified after it.</td></tr>
+<tr><td><strong>Base</strong> <em>(merge sense)</em></td><td>Per-field hashes of the last state both systems agreed on. The anchor of the three-way merge — not to be confused with an Airtable “base”.</td></tr>
+<tr><td><strong>Suppression</strong></td><td>Removed. The old KV-marker approach to echo detection; replaced by <code>base</code>.</td></tr>
+<tr><td><strong>Ticket</strong></td><td>60-second HMAC-signed token authorising one WebSocket connection to one connection's status stream.</td></tr>
+<tr><td><strong>Pacer</strong></td><td>Minimum-gap rate limiter, one per API client instance.</td></tr>
+</tbody></table></div>
+
+<hr>
+<p style="color:var(--ink-3);font-size:.85rem">Line numbers reflect the working tree at the time of writing. If a number looks off by a few, search for the surrounding comment instead — the comments in this codebase are stable landmarks and usually explain the <em>why</em> that the code alone does not.</p>
+</section>
+
+</main>
+</div>
+</body>
+</html>
